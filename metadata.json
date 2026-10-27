@@ -1,0 +1,6 @@
+{
+  "name": "The Sanober Files",
+  "description": "Classified murder mystery case archive — Case 1311.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
