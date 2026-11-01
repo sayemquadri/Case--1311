@@ -14,7 +14,7 @@ export interface ExperienceNavigationState {
   envelopeStage: EnvelopeStage;
 }
 
-export function createInitialExperienceState(totalPages = 3): ExperienceNavigationState {
+export function createInitialExperienceState(totalPages = 8): ExperienceNavigationState {
   return {
     currentScreen: 'opening',
     storyPageIndex: 0,

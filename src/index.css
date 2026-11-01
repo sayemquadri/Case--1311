@@ -2,6 +2,7 @@
 
 @theme {
   --font-mono: 'Courier Prime', 'Space Mono', 'Courier New', Courier, monospace;
+  --font-serif: 'Lora', 'Georgia', 'Cambria', serif;
 }
 
 @layer base {

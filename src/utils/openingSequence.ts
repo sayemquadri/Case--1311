@@ -4,7 +4,7 @@
  */
 
 /**
- * Exact specifications for The Sanober Files opening sequence.
+ * Exact specifications for CASE FILE 1311 opening sequence.
  */
 export const EXACT_CASE_TITLE = 'EXTREMELY CONFIDENTIAL \u2014 CASE 1311';
 export const EXACT_BUTTON_TEXT = 'check the case';
