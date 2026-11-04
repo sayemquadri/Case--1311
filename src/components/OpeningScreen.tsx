@@ -5,7 +5,8 @@
 
 import React, { useEffect, useState } from 'react';
 import {
-  EXACT_CASE_TITLE,
+  CASE_TITLE_LINE_1,
+  CASE_TITLE_LINE_2,
   EXACT_BUTTON_TEXT,
   DARKNESS_DURATION_MS,
   TOTAL_BUTTON_REVEAL_MS,
@@ -51,34 +52,37 @@ export function OpeningScreen({ onCheckCase, skipIntro = false }: OpeningScreenP
       className="fixed inset-0 w-screen h-[100dvh] bg-[#000000] text-[#A31525] flex items-center justify-center overflow-hidden p-6 select-none relative"
       aria-label="CASE FILE 1311 Classified Opening Screen"
     >
-      {/* Centered composition with generous surrounding pitch-black space */}
-      <div className="flex flex-col items-center justify-center text-center max-w-4xl w-full px-4">
-        {/* Case Title - slightly larger for cinematic presence while fitting mobile */}
+      {/* Title positioned around upper-middle/central region with cinematic negative space */}
+      <div className="flex flex-col items-center justify-center text-center max-w-xl w-full px-2 -translate-y-4 sm:-translate-y-6">
+        {/* Case Title - two deliberate lines, never wrapping CASE and 1311 separately */}
         {isTitleVisible && (
           <h1
             data-testid="case-title"
-            className="animate-title-glitch font-mono font-bold uppercase text-[#A31525] text-sm sm:text-base md:text-xl lg:text-2xl tracking-[0.16em] sm:tracking-[0.22em] leading-relaxed select-none"
+            className="animate-title-glitch font-mono font-bold uppercase text-[#A31525] text-sm sm:text-base md:text-xl lg:text-2xl tracking-[0.09em] sm:tracking-[0.14em] md:tracking-[0.18em] leading-snug sm:leading-relaxed select-none max-w-full"
           >
-            {EXACT_CASE_TITLE}
+            <span className="block whitespace-nowrap">{CASE_TITLE_LINE_1}</span>
+            <span className="block whitespace-nowrap mt-1 sm:mt-2 text-[#A31525]">
+              {CASE_TITLE_LINE_2}
+            </span>
           </h1>
         )}
       </div>
 
-      {/* Action Button: revealed in the bottom-right corner as an invitation into the classified dossier */}
+      {/* Action Button: revealed in the bottom-right corner, brighter crimson text, comfortable touch area */}
       {isButtonVisible && (
-        <div className="absolute bottom-6 right-6 sm:bottom-10 sm:right-10 animate-button-flicker z-20">
+        <div className="absolute bottom-8 right-6 sm:bottom-12 sm:right-10 animate-button-flicker z-20">
           <button
             type="button"
             data-testid="check-case-button"
             onClick={onCheckCase}
-            className="group font-mono text-xs sm:text-sm lowercase tracking-[0.18em] text-[#8F1320] hover:text-[#A31525] bg-transparent border border-transparent hover:border-[#8F1320]/30 px-3 py-1.5 transition-all duration-300 ease-out cursor-pointer active:opacity-60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#8F1320]/60 inline-flex items-center gap-2"
-            aria-label="Check the case file"
+            className="group font-mono text-sm sm:text-base lowercase tracking-[0.16em] text-[#DE3B4C] hover:text-[#FF5A6B] active:text-[#FF5A6B] bg-transparent border-0 cursor-pointer p-3 -m-3 min-h-[48px] inline-flex items-center gap-2.5 select-none transition-all duration-200 ease-out active:scale-[0.97] active:opacity-85 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#DE3B4C]/60"
+            aria-label="check the case"
           >
-            <span className="transition-all duration-300 group-hover:tracking-[0.24em]">
+            <span className="transition-colors duration-200">
               {EXACT_BUTTON_TEXT}
             </span>
             <span
-              className="text-[#8F1320] group-hover:text-[#A31525] transition-transform duration-300 group-hover:translate-x-1"
+              className="text-[#DE3B4C] group-hover:text-[#FF5A6B] group-hover:translate-x-1.5 transition-all duration-200 ease-out"
               aria-hidden="true"
             >
               →

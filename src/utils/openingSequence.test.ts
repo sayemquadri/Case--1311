@@ -7,8 +7,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   EXACT_CASE_TITLE,
+  CASE_TITLE_LINE_1,
+  CASE_TITLE_LINE_2,
   EXACT_BUTTON_TEXT,
   BLOOD_RED_COLOR,
+  BRIGHT_CRIMSON_COLOR,
   DARKNESS_DURATION_MS,
   BUTTON_DELAY_AFTER_TITLE_MS,
   TOTAL_BUTTON_REVEAL_MS,
@@ -17,8 +20,11 @@ import {
 
 test('exact text constants match user requirements', () => {
   assert.equal(EXACT_CASE_TITLE, 'EXTREMELY CONFIDENTIAL — CASE 1311');
+  assert.equal(CASE_TITLE_LINE_1, 'EXTREMELY CONFIDENTIAL');
+  assert.equal(CASE_TITLE_LINE_2, '— CASE 1311 —');
   assert.equal(EXACT_BUTTON_TEXT, 'check the case');
   assert.equal(BLOOD_RED_COLOR, '#A31525');
+  assert.equal(BRIGHT_CRIMSON_COLOR, '#DE3B4C');
 });
 
 test('timing parameters conform to requested sequential schedule', () => {

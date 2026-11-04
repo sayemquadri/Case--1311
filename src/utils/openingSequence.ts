@@ -7,8 +7,11 @@
  * Exact specifications for CASE FILE 1311 opening sequence.
  */
 export const EXACT_CASE_TITLE = 'EXTREMELY CONFIDENTIAL \u2014 CASE 1311';
+export const CASE_TITLE_LINE_1 = 'EXTREMELY CONFIDENTIAL';
+export const CASE_TITLE_LINE_2 = '\u2014 CASE 1311 \u2014';
 export const EXACT_BUTTON_TEXT = 'check the case';
 export const BLOOD_RED_COLOR = '#A31525';
+export const BRIGHT_CRIMSON_COLOR = '#DE3B4C';
 
 export const DARKNESS_DURATION_MS = 800; // ~0.8s silence and complete darkness
 export const GLITCH_DURATION_MS = 550; // brief cinematic glitch animation

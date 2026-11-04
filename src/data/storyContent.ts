@@ -59,23 +59,18 @@ export interface ExperienceContent {
 
 export const EXPERIENCE_CONTENT: ExperienceContent = {
   warning: {
-    heading: 'BEFORE YOU PROCEED',
+    heading: 'READER ADVISORY',
     stampText: 'CASE 1311 // RESTRICTED',
-    subheading: 'CONTENT ADVISORY — CASE 1311',
+    subheading: 'CONTENT ADVISORY',
     disclosures: [
-      'Family expectations, unwritten house rules, and the quiet gravitational pull of loved habits',
-      'The delicate psychological tension between deep family affection and personal autonomy',
-      'Uncertainty about long-term futures, deferred journeys, and unmade choices',
-      'Quiet introspection, midnight diary entries, and private self-discovery',
-      'Suspenseful detective correspondence, cryptic ciphers, and anonymous case notes',
-      'Fictionalized, symbolic references to a "murder" (specifically: the abrupt demise of a predictable birthday routine)',
+      'Homicide (1 victim, unidentified)',
+      'Missing evidence',
+      'Psychological suspense',
+      'Unreliable narrator',
+      'One suspect who knows you well',
     ],
-    authorNote: [
-      'This manuscript is an affectionate psychological mystery written exclusively as an interactive birthday tribute.',
-      'The characters, settings, and conflicts reflect artistic metaphors and emotional explorations rather than factual events or accusations.',
-      'No graphic violence, cruelty, or real malice is depicted anywhere in these archives. The metaphorical "murder" investigated herein refers entirely to the joyous disruption of an ordinary birthday.',
-    ],
-    buttonText: 'ENTER ANYWAYS →',
+    authorNote: [],
+    buttonText: 'CHECK THE FOOTAGE →',
   },
   story: {
     seriesTitle: 'THE GIRL IN THE BEAUTIFUL CAGE',
@@ -425,3 +420,140 @@ export const EXPERIENCE_CONTENT: ExperienceContent = {
       'Dear Sanober,\n\n[LETTER CONTENT]\n\nReserved for the personal birthday letter, warmest wishes, inside memories, and humorous birthday roast.\n(Replace this editable block with your birthday letter text when ready.)',
   },
 };
+
+export interface DiarySpread {
+  id: number;
+  entryDate: string;
+  entryTitle: string;
+  leftPage: {
+    greetingPrefix: string;
+    obscuredNameNote: string;
+    text: string[];
+    handwrittenSignoff?: string;
+  };
+  rightPage: {
+    exhibitTag: string;
+    caption: string;
+    annotationNotes: string[];
+    photoType: 'house' | 'map' | 'midnight' | 'cipher';
+    isFinalSpread?: boolean;
+    hiddenPasswordClue?: {
+      code: string;
+      label: string;
+      instruction: string;
+    };
+  };
+}
+
+export const DIARY_SPREADS: DiarySpread[] = [
+  {
+    id: 1,
+    entryDate: 'OCTOBER 14 · 11:30 PM',
+    entryTitle: 'THE HOUSE OF WARM LIGHT',
+    leftPage: {
+      greetingPrefix: "hii, I'm",
+      obscuredNameNote: '[TORN EDGE / BLOOD STAIN]',
+      text: [
+        'There is nothing cruel about this house. That is what makes it so impossible to explain to anyone outside.',
+        'Someone always notices when I return home late. Someone always asks whether I have eaten. There are unspoken family rules, quiet expectations, and traditions repeated until nobody remembers who began them.',
+        'The inconvenient truth is simple: I love my family dearly. It would have made for an easier mystery if I didn’t.',
+        'Sometimes I look at this house from across the dark road—its golden windows, its warm laughter—and I think: it is the most beautiful cage anyone could ever build. And I don’t even know if wishing to leave it makes me selfish.',
+      ],
+      handwrittenSignoff: '— scribbled while the house sleeps',
+    },
+    rightPage: {
+      exhibitTag: 'EXHIBIT 1311-01 // THE ENCLOSURE',
+      caption: 'Forensic Scan: Blurry photograph recovered between floorboards',
+      annotationNotes: [
+        'Evidence Note: Illuminated residence; no external locks detected.',
+        'Margin Note: "Why do I feel like a ghost in rooms where I am so fiercely loved?"',
+        'Forensic Observation: Dried red thumbprint along lower deckled edge.',
+      ],
+      photoType: 'house',
+    },
+  },
+  {
+    id: 2,
+    entryDate: 'OCTOBER 28 · 01:15 AM',
+    entryTitle: 'THE SECRET ATLASES',
+    leftPage: {
+      greetingPrefix: "hii, I'm",
+      obscuredNameNote: '[TORN EDGE / BLOOD STAIN]',
+      text: [
+        'Beneath the bottom drawer of my wardrobe, hidden under university notebooks, I keep maps of cities I have never visited. Lisbon at sunrise. The midnight sleeper to Vienna. The coastline near Porto.',
+        'I trace the tracks with my fingernails until the paper softens. I have chosen the books I read, the clothes I wear, and the quiet rhythm of my days.',
+        'Yet the horizon itself feels pre-assigned, written into law before I took my first breath.',
+        'Every ticket I never bought is an unwritten secret folded between the seams of this diary.',
+      ],
+      handwrittenSignoff: '— midnight route notes',
+    },
+    rightPage: {
+      exhibitTag: 'EXHIBIT 1311-02 // THE UNSTAMPED ITINERARY',
+      caption: 'Transit Route Fragment: Circled railway coordinates in crimson ink',
+      annotationNotes: [
+        'Evidence Note: Stamped railway passes to destinations never visited.',
+        'Margin Note: "A caged bird with a library card is still behind bars."',
+        'Forensic Observation: Tea stains and paper scorched along left margin.',
+      ],
+      photoType: 'map',
+    },
+  },
+  {
+    id: 3,
+    entryDate: 'NOVEMBER 06 · 02:40 AM',
+    entryTitle: 'MIDNIGHT WHISPERS',
+    leftPage: {
+      greetingPrefix: "hii, I'm",
+      obscuredNameNote: '[TORN EDGE / BLOOD STAIN]',
+      text: [
+        'It is past two in the morning. The house has settled into dead silence. This is the only hour of the day that belongs entirely to me.',
+        'Under the amber lamp, I write what I could never dare voice at the family table. I write of wind, of open fields, of stepping onto an empty train platform with a single coat and no return date.',
+        'And lately... I have felt an impossible certainty that someone is watching. Not with judgment, but with astonishing understanding. Someone who knows what I whisper to the dark.',
+      ],
+      handwrittenSignoff: '— ink drying fast',
+    },
+    rightPage: {
+      exhibitTag: 'EXHIBIT 1311-03 // THE WITNESS ARCHIVE',
+      caption: 'Recovered Artifact: Dried botanical petal pinned with oxidized wire',
+      annotationNotes: [
+        'Evidence Note: Anonymous investigator footprints documented outside perimeter.',
+        'Margin Note: "He watches from the shadows of this story. He knows what I am waiting for."',
+        'Forensic Observation: Red ink splatter across exhibit tag.',
+      ],
+      photoType: 'midnight',
+    },
+  },
+  {
+    id: 4,
+    entryDate: 'NOVEMBER 13 · FINAL ENTRY',
+    entryTitle: 'THE UNLOCKED DOOR & CIPHER',
+    leftPage: {
+      greetingPrefix: "hii, I'm",
+      obscuredNameNote: '[TORN EDGE / BLOOD STAIN]',
+      text: [
+        'If you have followed my trail this far into the evidence locker, you understand the truth now.',
+        'The girl in the beautiful cage was never a casualty of violence. The only murder committed here was the abrupt end of an ordinary, predictable existence.',
+        'The door of this cage was never locked from the outside. To unlock the sealed envelope waiting on the surveillance table, you must enter the classified case reference that brought you here.',
+        'Enter the 4-digit case number into the envelope security prompt to break the seal.',
+      ],
+      handwrittenSignoff: '— dossier complete',
+    },
+    rightPage: {
+      exhibitTag: 'EXHIBIT 1311-04 // MASTER CIPHER',
+      caption: 'Archival Key: Forensic clearance stamp and envelope passcode',
+      annotationNotes: [
+        'CONFIDENTIAL CIPHER: The 4-digit code to unlock Exhibit B is "1311".',
+        'Margin Note: "Your secret admirer has prepared the final confession inside the envelope."',
+        'Status: Ready for evidence extraction.',
+      ],
+      photoType: 'cipher',
+      isFinalSpread: true,
+      hiddenPasswordClue: {
+        code: '1311',
+        label: 'CASE REFERENCE CIPHER: 1311',
+        instruction: 'Enter passcode 1311 or tap below to unlock the envelope',
+      },
+    },
+  },
+];
+

@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import { AppScreen } from './utils/experienceState';
 import { OpeningScreen } from './components/OpeningScreen';
 import { TriggerWarningScreen } from './components/TriggerWarningScreen';
+import { CctvSurveillanceScreen } from './components/CctvSurveillanceScreen';
 import { StoryBookScreen } from './components/StoryBookScreen';
 import { FinalEnvelopeScreen } from './components/FinalEnvelopeScreen';
 
@@ -17,15 +18,17 @@ export default function App() {
     const screenParam = params.get('screen');
     if (
       screenParam === 'warning' ||
+      screenParam === 'cctv' ||
       screenParam === 'story' ||
       screenParam === 'envelope'
     ) {
-      return screenParam;
+      return screenParam as AppScreen;
     }
     return 'opening';
   };
 
   const [currentScreen, setCurrentScreen] = useState<AppScreen>(getInitialScreen);
+  const [isEnvelopeUnlocked, setIsEnvelopeUnlocked] = useState<boolean>(false);
 
   const params = new URLSearchParams(window.location.search);
   const skipIntro = params.get('autostart') === '1';
@@ -36,16 +39,25 @@ export default function App() {
     setCurrentScreen('warning');
   };
 
-  const handleEnterAnyways = () => {
-    setCurrentScreen('story');
+  const handleProceedToCctv = () => {
+    setCurrentScreen('cctv');
   };
 
-  const handleProceedToEnvelope = () => {
+  const handleUnlockEnvelope = () => {
+    setIsEnvelopeUnlocked(true);
     setCurrentScreen('envelope');
   };
 
-  const handleReturnToStory = () => {
-    setCurrentScreen('story');
+  const handleDirectOpenEnvelope = () => {
+    setCurrentScreen('envelope');
+  };
+
+  const handleReturnToCctv = () => {
+    setCurrentScreen('cctv');
+  };
+
+  const handleProceedToEnvelopeFromStory = () => {
+    setCurrentScreen('envelope');
   };
 
   return (
@@ -55,20 +67,29 @@ export default function App() {
         <OpeningScreen onCheckCase={handleCheckCase} skipIntro={skipIntro} />
       )}
 
-      {/* 2. TRIGGER WARNING SCREEN */}
+      {/* 2. TRIGGER WARNING SCREEN — BUTTON: CHECK THE FOOTAGE → */}
       {currentScreen === 'warning' && (
-        <TriggerWarningScreen onEnterAnyways={handleEnterAnyways} />
+        <TriggerWarningScreen onEnterAnyways={handleProceedToCctv} />
       )}
 
-      {/* 3. “HER STORY” — INTERACTIVE BOOK */}
+      {/* 3. CCTV SURVEILLANCE EVIDENCE SCENE */}
+      {currentScreen === 'cctv' && (
+        <CctvSurveillanceScreen
+          onUnlockEnvelopeSuccess={handleUnlockEnvelope}
+          onDirectOpenEnvelope={handleDirectOpenEnvelope}
+          isEnvelopeUnlocked={isEnvelopeUnlocked}
+        />
+      )}
+
+      {/* 4. LEGACY / FALLBACK STORYBOOK SCREEN */}
       {currentScreen === 'story' && (
-        <StoryBookScreen onProceedToEnvelope={handleProceedToEnvelope} />
+        <StoryBookScreen onProceedToEnvelope={handleProceedToEnvelopeFromStory} />
       )}
 
-      {/* 4. FINAL SCENE — THE ENVELOPE */}
+      {/* 5. FINAL SCENE — THE ENVELOPE & BIRTHDAY CELEBRATION */}
       {currentScreen === 'envelope' && (
         <FinalEnvelopeScreen
-          onReturnToStory={handleReturnToStory}
+          onReturnToCctv={handleReturnToCctv}
           defaultRevealed={defaultRevealed}
         />
       )}
