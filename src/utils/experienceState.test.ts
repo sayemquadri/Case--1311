@@ -20,6 +20,10 @@ import {
   handlePrevDiarySpread,
   handleCloseDiary,
   handleUnlockEnvelopeWithPassword,
+  getSpreadIndexFromPageIndex,
+  getPageIndicesForSpread,
+  handleNextDiaryPage,
+  handlePrevDiaryPage,
 } from './experienceState';
 import { EXPERIENCE_CONTENT, DIARY_SPREADS } from '../data/storyContent';
 
@@ -183,4 +187,38 @@ test('detective laren dialogue constants match exact user specifications', () =>
   assert.equal(bedroom, "finally we found the diary! Interesting, we should read it, tap into it!");
   assert.equal(livingRoom, "Ohh an envelope? You should check it out by tapping on it");
   assert.equal(lockedEnvelope, "Ohh we require a password! It should be on the diary! We should find it");
+});
+
+test('diary single-page navigation and spread index mappings work correctly', () => {
+  // Spread conversions
+  assert.equal(getSpreadIndexFromPageIndex(0), 0);
+  assert.equal(getSpreadIndexFromPageIndex(1), 0);
+  assert.equal(getSpreadIndexFromPageIndex(2), 1);
+  assert.equal(getSpreadIndexFromPageIndex(3), 1);
+  assert.equal(getSpreadIndexFromPageIndex(4), 2);
+  assert.equal(getSpreadIndexFromPageIndex(5), 2);
+  assert.equal(getSpreadIndexFromPageIndex(6), 3);
+  assert.equal(getSpreadIndexFromPageIndex(7), 3);
+
+  assert.deepEqual(getPageIndicesForSpread(0), [0, 1]);
+  assert.deepEqual(getPageIndicesForSpread(1), [2, 3]);
+  assert.deepEqual(getPageIndicesForSpread(2), [4, 5]);
+  assert.deepEqual(getPageIndicesForSpread(3), [6, 7]);
+
+  // Next page pagination (0 to 7)
+  let p = 0;
+  p = handleNextDiaryPage(p, 8);
+  assert.equal(p, 1);
+  p = handleNextDiaryPage(p, 8);
+  assert.equal(p, 2);
+  // Clamping at last page
+  assert.equal(handleNextDiaryPage(7, 8), 7);
+
+  // Prev page pagination
+  p = handlePrevDiaryPage(p);
+  assert.equal(p, 1);
+  p = handlePrevDiaryPage(p);
+  assert.equal(p, 0);
+  // Clamping at first page
+  assert.equal(handlePrevDiaryPage(0), 0);
 });

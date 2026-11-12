@@ -103,6 +103,23 @@ export function handlePrevDiarySpread(
   return state;
 }
 
+export function getSpreadIndexFromPageIndex(pageIndex: number): number {
+  return Math.max(0, Math.floor(pageIndex / 2));
+}
+
+export function getPageIndicesForSpread(spreadIndex: number): [number, number] {
+  const left = Math.max(0, spreadIndex * 2);
+  return [left, left + 1];
+}
+
+export function handleNextDiaryPage(currentPage: number, totalPages = 8): number {
+  return Math.min(totalPages - 1, currentPage + 1);
+}
+
+export function handlePrevDiaryPage(currentPage: number): number {
+  return Math.max(0, currentPage - 1);
+}
+
 export function validateEnvelopePassword(input: string): boolean {
   if (!input) return false;
   const cleaned = input.trim().toLowerCase().replace(/[\s\-_#]/g, '');

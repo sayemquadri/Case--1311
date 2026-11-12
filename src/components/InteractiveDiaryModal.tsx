@@ -3,13 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { DIARY_SPREADS, DiarySpread } from '../data/storyContent';
-import { ClassifiedStamp, CrimsonFingerprint, InkSplatter } from './TactileDecorations';
 
 // Assets
 import antiquePaperImg from '../assets/images/antique_manuscript_paper_1793563752766.jpg';
-import vintageJournalImg from '../assets/images/vintage_reading_journal_1793563753682.jpg';
 
 interface InteractiveDiaryModalProps {
   isOpen: boolean;
@@ -18,322 +16,590 @@ interface InteractiveDiaryModalProps {
   onPageTurnAudio?: () => void;
 }
 
+/**
+ * Realistic physical torn paper patch with fibrous frayed edges and dried crimson blood smears.
+ * Visually conceals the name without displaying any placeholder text.
+ */
+function TornPaperNameCover() {
+  return (
+    <span
+      className="relative inline-block align-middle mx-1 my-0.5 select-none"
+      style={{ width: '88px', height: '22px' }}
+      title="Name torn away and stained with crimson ink"
+      aria-label="Name torn out of page and stained"
+    >
+      {/* Background shadow of the excised torn fragment */}
+      <span
+        className="absolute inset-0 bg-black/40 filter blur-[1px] translate-y-[1px] translate-x-[0.5px] pointer-events-none"
+        style={{
+          clipPath:
+            'polygon(2% 14%, 12% 5%, 26% 11%, 43% 3%, 60% 12%, 74% 6%, 86% 15%, 98% 7%, 96% 46%, 99% 75%, 94% 94%, 82% 90%, 68% 97%, 52% 89%, 36% 96%, 20% 88%, 6% 95%, 2% 70%, 1% 40%)',
+        }}
+      />
+
+      {/* Exposed white/cream paper fiber fringe along the tear */}
+      <span
+        className="absolute inset-[-1px] bg-[#FAF5EA] opacity-90 pointer-events-none"
+        style={{
+          clipPath:
+            'polygon(1% 11%, 10% 2%, 24% 8%, 41% 1%, 58% 10%, 72% 3%, 85% 12%, 99% 4%, 97% 43%, 100% 77%, 95% 96%, 83% 92%, 69% 99%, 53% 91%, 37% 98%, 21% 90%, 5% 97%, 1% 72%, 0% 38%)',
+        }}
+      />
+
+      {/* Main torn parchment strip */}
+      <span
+        className="absolute inset-0 bg-gradient-to-r from-[#D7C5A0] via-[#E9DBBC] to-[#CFBF9A] pointer-events-none"
+        style={{
+          clipPath:
+            'polygon(3% 14%, 13% 6%, 26% 12%, 43% 5%, 59% 13%, 73% 7%, 86% 16%, 97% 8%, 95% 47%, 98% 73%, 93% 92%, 81% 88%, 67% 95%, 51% 87%, 35% 94%, 19% 86%, 5% 93%, 3% 68%, 2% 42%)',
+          boxShadow: 'inset 0 1px 2px rgba(255,255,255,0.4), inset 0 -1px 2px rgba(0,0,0,0.25)',
+        }}
+      >
+        {/* Paper fiber lines texture */}
+        <span
+          className="absolute inset-0 opacity-20 mix-blend-multiply pointer-events-none"
+          style={{
+            backgroundImage:
+              'repeating-linear-gradient(90deg, transparent 0px, transparent 3px, rgba(120,90,50,0.2) 3px, rgba(120,90,50,0.2) 4px)',
+          }}
+        />
+
+        {/* Realistic dried blood smear & irregular stain droplets */}
+        <svg
+          viewBox="0 0 100 24"
+          className="absolute inset-0 w-full h-full pointer-events-none opacity-90"
+          preserveAspectRatio="none"
+        >
+          {/* Base blood pool smear */}
+          <path
+            d="M 6 12 Q 22 7 40 12 Q 58 15 74 9 Q 89 6 94 13 Q 86 21 66 18 Q 46 22 26 18 Q 12 21 6 12 Z"
+            fill="#5E0B14"
+            opacity="0.85"
+          />
+          {/* Darker clotted oxidized center */}
+          <path
+            d="M 16 11 Q 32 8 48 12 Q 62 14 78 10 Q 70 17 52 15 Q 34 18 16 11 Z"
+            fill="#3B050B"
+            opacity="0.9"
+          />
+          {/* Subtle blood splatter droplets and smears */}
+          <circle cx="12" cy="7" r="1.5" fill="#6E0D18" opacity="0.75" />
+          <circle cx="84" cy="16" r="1.2" fill="#5E0B14" opacity="0.7" />
+          <circle cx="44" cy="5" r="1.1" fill="#7E101D" opacity="0.65" />
+          <path d="M 62 14 Q 65 20 63 23" stroke="#5E0B14" strokeWidth="1" strokeLinecap="round" opacity="0.65" />
+        </svg>
+
+        {/* Faint pen tear line across the excised paper */}
+        <span className="absolute inset-y-1.5 inset-x-2 border-b border-[#3B050B]/35 opacity-70" />
+      </span>
+    </span>
+  );
+}
+
+/**
+ * Strips forensic labels from captions and marginalia to preserve authentic personal diary tone.
+ */
+function cleanNoteText(rawText: string): string {
+  return rawText
+    .replace(/^Forensic Scan:\s*/i, '')
+    .replace(/^Forensic Observation:\s*/i, '')
+    .replace(/^Evidence Note:\s*/i, '')
+    .replace(/^Margin Note:\s*/i, '')
+    .replace(/^Status:\s*/i, '');
+}
+
 export function InteractiveDiaryModal({
   isOpen,
   onClose,
   onProceedToUnlock,
   onPageTurnAudio,
 }: InteractiveDiaryModalProps) {
-  const [currentSpreadIndex, setCurrentSpreadIndex] = useState(0);
+  // Mobile breakpoint check (< 768px shows 1 page at a time; >= 768px shows 2-page spread)
+  const [isMobile, setIsMobile] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth < 768;
+    }
+    return false;
+  });
+
+  // Track single page index (0 to 7 across the 4 spreads)
+  const [pageIndex, setPageIndex] = useState<number>(0);
   const [turnDirection, setTurnDirection] = useState<'next' | 'prev' | null>(null);
+
+  // Touch gesture coordinates for swipe navigation
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   if (!isOpen) return null;
 
+  const totalPages = 8;
+  const totalSpreads = DIARY_SPREADS.length; // 4
+  const currentSpreadIndex = Math.min(totalSpreads - 1, Math.floor(pageIndex / 2));
   const currentSpread: DiarySpread = DIARY_SPREADS[currentSpreadIndex];
-  const isFirstSpread = currentSpreadIndex === 0;
-  const isLastSpread = currentSpreadIndex === DIARY_SPREADS.length - 1;
+
+  // Mobile navigation boundaries
+  const isFirst = isMobile ? pageIndex === 0 : currentSpreadIndex === 0;
+  const isLast = isMobile ? pageIndex === totalPages - 1 : currentSpreadIndex === totalSpreads - 1;
 
   const handleNext = () => {
-    if (isLastSpread) return;
+    if (isLast) return;
     onPageTurnAudio?.();
     setTurnDirection('next');
     setTimeout(() => {
-      setCurrentSpreadIndex((prev) => prev + 1);
+      if (isMobile) {
+        setPageIndex((prev) => Math.min(totalPages - 1, prev + 1));
+      } else {
+        setPageIndex((prev) => {
+          const nextSpread = Math.min(totalSpreads - 1, Math.floor(prev / 2) + 1);
+          return nextSpread * 2;
+        });
+      }
       setTurnDirection(null);
     }, 180);
   };
 
   const handlePrev = () => {
-    if (isFirstSpread) return;
+    if (isFirst) return;
     onPageTurnAudio?.();
     setTurnDirection('prev');
     setTimeout(() => {
-      setCurrentSpreadIndex((prev) => prev - 1);
+      if (isMobile) {
+        setPageIndex((prev) => Math.max(0, prev - 1));
+      } else {
+        setPageIndex((prev) => {
+          const prevSpread = Math.max(0, Math.floor(prev / 2) - 1);
+          return prevSpread * 2;
+        });
+      }
       setTurnDirection(null);
     }, 180);
   };
+
+  // Touch handlers for mobile swipe navigation
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+    const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+    const deltaY = e.changedTouches[0].clientY - touchStartY.current;
+    touchStartX.current = null;
+    touchStartY.current = null;
+
+    // Detect horizontal swipe if delta is significant and horizontal
+    if (Math.abs(deltaX) > 40 && Math.abs(deltaX) > Math.abs(deltaY) * 1.4) {
+      if (deltaX < 0) {
+        handleNext();
+      } else {
+        handlePrev();
+      }
+    }
+  };
+
+  // Keyboard navigation support (Arrow keys)
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowRight') handleNext();
+    if (e.key === 'ArrowLeft') handlePrev();
+    if (e.key === 'Escape') onClose();
+  };
+
+  // Whether mobile view is currently displaying the Left Page (even index) or Right Page (odd index)
+  const isLeftPageOnMobile = pageIndex % 2 === 0;
+
+  // Render Left Page Content (Personal handwritten entry)
+  const renderLeftPage = (spread: DiarySpread, isMobileView: boolean) => (
+    <div
+      className={`relative p-3.5 xs:p-4.5 sm:p-7 flex flex-col justify-between h-full bg-[#FAF4E5] select-text ${
+        isMobileView ? 'rounded' : 'md:border-r border-[#C7B594]/60'
+      }`}
+      style={{
+        backgroundImage: `
+          linear-gradient(to right, rgba(237, 225, 197, 0.4), rgba(250, 244, 229, 0.95) 40%, rgba(236, 224, 196, 0.5)),
+          url(${antiquePaperImg})
+        `,
+        backgroundSize: 'cover',
+      }}
+    >
+      {/* Decorative center spine shadow gradient for desktop curvature */}
+      {!isMobileView && (
+        <div className="hidden md:block absolute top-0 bottom-0 right-0 w-10 bg-gradient-to-l from-black/25 via-black/10 to-transparent pointer-events-none" />
+      )}
+
+      {/* Curvature inner shadow for physical realism */}
+      <div className="absolute inset-0 pointer-events-none shadow-[inset_0_2px_10px_rgba(0,0,0,0.06)]" />
+
+      {/* Main Narrative Block */}
+      <div className="space-y-2 xs:space-y-2.5">
+        {/* Entry Date & Title (Natural journal elements only) */}
+        <div className="border-b border-[#8F1320]/25 pb-1.5 xs:pb-2">
+          <div className="font-serif text-[10.5px] xs:text-[11.5px] sm:text-xs font-semibold text-[#8F1320] tracking-wider uppercase">
+            {spread.entryDate}
+          </div>
+          <h2
+            className="font-serif text-sm xs:text-base sm:text-lg font-bold tracking-tight text-[#1E1513] mt-0.5 leading-snug"
+            style={{ fontFamily: "'Cinzel', 'Lora', serif" }}
+          >
+            {spread.entryTitle}
+          </h2>
+        </div>
+
+        {/* Greeting with Physical Torn-Name Effect */}
+        <div className="pt-0.5">
+          <div className="inline-flex items-center flex-wrap font-serif text-xs xs:text-[13.5px] sm:text-base font-bold text-[#1F1513]">
+            <span className="italic mr-0.5">{spread.leftPage.greetingPrefix}</span>
+            <TornPaperNameCover />
+            <span className="ml-0.5">,</span>
+          </div>
+        </div>
+
+        {/* Narrative Paragraphs */}
+        <div className="space-y-1.5 xs:space-y-2 sm:space-y-2.5 font-serif text-[11px] xs:text-[12px] sm:text-[13.5px] leading-[1.48] xs:leading-[1.52] sm:leading-relaxed text-[#2B1F1C]">
+          {spread.leftPage.text.map((paragraph, idx) => (
+            <p key={idx}>{paragraph}</p>
+          ))}
+        </div>
+      </div>
+
+      {/* Bottom Signoff in Cursive Handwriting */}
+      <div className="pt-2 sm:pt-3 border-t border-[#B5A17D]/40 font-handwriting text-xs xs:text-sm sm:text-base text-[#6B5342] italic mt-auto">
+        {spread.leftPage.handwrittenSignoff}
+      </div>
+    </div>
+  );
+
+  // Render Right Page Content (Keepsakes, drawings, cipher key)
+  const renderRightPage = (spread: DiarySpread, isMobileView: boolean) => (
+    <div
+      className={`relative p-3.5 xs:p-4.5 sm:p-7 flex flex-col justify-between h-full bg-[#FAF4E5] select-text ${
+        isMobileView ? 'rounded' : ''
+      }`}
+      style={{
+        backgroundImage: `
+          linear-gradient(to right, rgba(236, 224, 196, 0.5), rgba(250, 244, 229, 0.95) 60%, rgba(237, 225, 197, 0.4)),
+          url(${antiquePaperImg})
+        `,
+        backgroundSize: 'cover',
+      }}
+    >
+      {/* Decorative center spine shadow gradient for desktop curvature */}
+      {!isMobileView && (
+        <div className="hidden md:block absolute top-0 bottom-0 left-0 w-10 bg-gradient-to-r from-black/25 via-black/10 to-transparent pointer-events-none" />
+      )}
+
+      {/* Curvature inner shadow */}
+      <div className="absolute inset-0 pointer-events-none shadow-[inset_0_2px_10px_rgba(0,0,0,0.06)]" />
+
+      <div>
+        {/* Keepsake Header */}
+        <div className="border-b border-[#8F1320]/25 pb-1.5 xs:pb-2 mb-2 sm:mb-3 flex items-center justify-between">
+          <span className="font-serif italic text-[11px] sm:text-xs text-[#8F1320] font-semibold">
+            {spread.rightPage.isFinalSpread ? 'Secret Note & Cipher' : 'Memories & Keepsakes'}
+          </span>
+          <span className="font-handwriting text-xs text-[#7A6455] opacity-75">
+            fragment
+          </span>
+        </div>
+
+        {/* Visual Artifacts / Keepsakes */}
+        <div className="mb-2 sm:mb-3">
+          {spread.rightPage.photoType === 'house' && (
+            <div className="relative bg-[#2B1B15] p-2 sm:p-2.5 rounded shadow-md border border-[#8F1320]/40 -rotate-1 max-w-[280px] sm:max-w-none mx-auto">
+              {/* Decorative washi tape */}
+              <div className="absolute -top-2 left-6 w-10 sm:w-12 h-3.5 sm:h-4 bg-[#DFD0AA]/85 border border-[#9A8462] rotate-3 shadow-xs pointer-events-none" />
+              <div className="w-full h-20 xs:h-24 sm:h-28 bg-[#120D0A] flex flex-col items-center justify-center text-center p-2 rounded">
+                <span className="text-xl sm:text-2xl mb-1">🏡</span>
+                <span className="font-serif italic text-[10px] xs:text-[11px] sm:text-xs text-[#E8DCB9] leading-tight">
+                  &ldquo;A house of golden lamps, warm tea, and unyielding routines.&rdquo;
+                </span>
+              </div>
+              <div className="mt-1 text-[9.5px] xs:text-[10.5px] font-handwriting text-[#E8DCB9]/90 text-center">
+                {cleanNoteText(spread.rightPage.caption)}
+              </div>
+            </div>
+          )}
+
+          {spread.rightPage.photoType === 'map' && (
+            <div className="relative bg-[#F2E8D2] p-2 sm:p-2.5 rounded shadow-md border-2 border-dashed border-[#8F1320]/60 rotate-1 max-w-[280px] sm:max-w-none mx-auto">
+              <div className="w-full h-20 xs:h-24 sm:h-28 bg-[#FAF4E5] flex flex-col items-center justify-center text-center p-2 rounded border border-[#C2B193]">
+                <span className="text-xl sm:text-2xl mb-1">🗺️</span>
+                <span className="font-serif italic text-[10px] xs:text-[11px] sm:text-xs text-[#4A382C] leading-tight">
+                  &ldquo;Lisbon · Prague · Vienna — routes circled in red ink.&rdquo;
+                </span>
+              </div>
+              <div className="mt-1 text-[9.5px] xs:text-[10.5px] font-handwriting text-[#8F1320] text-center font-bold">
+                {cleanNoteText(spread.rightPage.caption)}
+              </div>
+            </div>
+          )}
+
+          {spread.rightPage.photoType === 'midnight' && (
+            <div className="relative bg-[#231A16] p-2 sm:p-2.5 rounded shadow-md border border-[#8F1320] -rotate-1 max-w-[280px] sm:max-w-none mx-auto">
+              <div className="w-full h-20 xs:h-24 sm:h-28 bg-[#0F0A08] flex flex-col items-center justify-center text-center p-2 rounded border border-[#52131A]">
+                <span className="text-xl sm:text-2xl mb-1">🕯️</span>
+                <span className="font-serif italic text-[10px] xs:text-[11px] sm:text-xs text-[#E8DCB9] leading-tight">
+                  &ldquo;The anonymous observer waits outside the light of the cage.&rdquo;
+                </span>
+              </div>
+              <div className="mt-1 text-[9.5px] xs:text-[10.5px] font-handwriting text-[#E8DCB9]/90 text-center">
+                {cleanNoteText(spread.rightPage.caption)}
+              </div>
+            </div>
+          )}
+
+          {/* ================= FINAL ENTRY: THE HIDDEN CIPHER KEY ================= */}
+          {spread.rightPage.isFinalSpread && (
+            <div
+              data-testid="hidden-password-clue-box"
+              className="relative bg-[#FFF9EE] border-2 border-[#8F1320] p-3 sm:p-4 rounded shadow-lg text-center space-y-1.5 sm:space-y-2 -rotate-1 max-w-[300px] sm:max-w-none mx-auto"
+            >
+              <div className="font-serif text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] text-[#8F1320]">
+                ★ CONFIDENTIAL CIPHER KEY ★
+              </div>
+              <div className="py-1.5 px-3 sm:py-2 sm:px-4 bg-[#8F1320]/10 border-2 border-dashed border-[#8F1320] rounded inline-block">
+                <span className="font-mono text-xl sm:text-2xl font-bold tracking-[0.3em] text-[#8F1320]">
+                  1311
+                </span>
+              </div>
+              <p className="font-serif text-[10.5px] sm:text-xs text-[#3D2E28] leading-tight">
+                {spread.rightPage.hiddenPasswordClue?.instruction ||
+                  'Enter passcode 1311 or tap below to unlock the envelope'}
+              </p>
+
+              <button
+                type="button"
+                data-testid="unlock-envelope-direct-button"
+                onClick={() => {
+                  onClose();
+                  onProceedToUnlock();
+                }}
+                className="w-full py-2 px-3 sm:py-2.5 sm:px-4 bg-[#8F1320] hover:bg-[#A31525] active:bg-[#6E0E18] text-white font-mono text-[10.5px] sm:text-xs font-bold uppercase tracking-wider rounded transition-colors shadow-md cursor-pointer flex items-center justify-center gap-1.5 mt-1"
+              >
+                <span>🔓 UNLOCK ENVELOPE (CODE: 1311) →</span>
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Marginalia Handwritten Notes (Cursive handwriting without forensic tags) */}
+        <div className="space-y-1.5 pt-1">
+          {spread.rightPage.annotationNotes
+            .filter((note) => !note.toLowerCase().includes('status:'))
+            .map((note, idx) => {
+              const cleaned = cleanNoteText(note);
+              return (
+                <div
+                  key={idx}
+                  className="font-handwriting text-xs xs:text-[13px] sm:text-[14px] text-[#5A3E2F] leading-snug flex items-start gap-1.5"
+                >
+                  <span className="text-[#8F1320] font-bold shrink-0">~</span>
+                  <span>{cleaned}</span>
+                </div>
+              );
+            })}
+        </div>
+      </div>
+
+      {/* Natural Bottom Accent */}
+      <div className="pt-2 sm:pt-3 border-t border-[#B5A17D]/40 flex items-center justify-between text-[#8F1320] text-xs font-serif italic opacity-70">
+        <span>journal notes</span>
+        <span>•</span>
+      </div>
+    </div>
+  );
 
   return (
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Interactive Antique Diary"
-      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/90 backdrop-blur-md overflow-y-auto"
+      aria-label="Antique Personal Journal"
+      onKeyDown={handleKeyDown}
+      className="fixed inset-0 z-50 flex flex-col justify-between items-center p-2 sm:p-4 bg-black/92 backdrop-blur-md overflow-hidden select-none"
     >
-      <div className="relative max-w-4xl w-full my-auto flex flex-col items-center">
-        {/* Top Control Bar */}
-        <div className="w-full flex items-center justify-between py-2 px-3 mb-2 bg-[#120F0D]/90 border border-[#8F1320]/40 rounded text-neutral-300 font-mono text-xs">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#8F1320] animate-pulse" />
-            <span className="font-bold text-[#D5A0A6] uppercase tracking-wider">
-              EXHIBIT 1311-A // RECOVERED ANTIQUE DIARY
-            </span>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <span className="text-[#A89887] text-[11px] hidden sm:inline">
-              SPREAD {currentSpreadIndex + 1} OF {DIARY_SPREADS.length}
-            </span>
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-2.5 py-1 bg-[#8F1320]/20 hover:bg-[#8F1320] text-red-200 text-xs font-bold rounded border border-[#8F1320]/50 transition-colors cursor-pointer"
-            >
-              ✕ Close Diary
-            </button>
-          </div>
+      {/* ================= TOP CONTROL BAR (Outside Book Pages) ================= */}
+      <div className="w-full max-w-4xl flex items-center justify-between py-1.5 px-2 sm:px-3 mb-1 shrink-0 bg-[#140F0D]/90 border border-[#8F1320]/30 rounded text-neutral-300">
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-[#8F1320] animate-pulse" />
+          <span
+            className="font-serif italic text-xs sm:text-sm text-[#F0D5D8] tracking-wider"
+            style={{ fontFamily: "'Cinzel', 'Lora', serif" }}
+          >
+            Her Personal Journal
+          </span>
         </div>
 
-        {/* Physical Antique Book Container */}
-        <div className="relative w-full shadow-[0_25px_70px_rgba(0,0,0,0.98),0_0_20px_rgba(143,19,32,0.4)] rounded-lg p-2 sm:p-5 bg-[#2B1B15] border-4 border-[#3D261E]">
-          {/* Leather Book Spine & Texture Rim */}
-          <div className="absolute inset-0 pointer-events-none rounded-lg border-2 border-[#170E0A] opacity-70" />
-
-          {/* Book Double-Page Spread */}
-          <div
-            className={`grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-0 bg-[#F4ECDA] text-[#241A15] rounded border border-[#BFA985] shadow-2xl overflow-hidden transition-opacity duration-200 ${
-              turnDirection ? 'opacity-70 scale-[0.99]' : 'opacity-100 scale-100'
-            }`}
-            style={{
-              backgroundImage: 'linear-gradient(to right, #EDE1C5, #FAF4E5 50%, #ECE0C4)',
-            }}
-          >
-            {/* ================= LEFT PAGE ================= */}
-            <div className="relative p-4 sm:p-7 md:border-r border-[#C7B594] flex flex-col justify-between min-h-[360px] sm:min-h-[440px] bg-[#FAF4E5]/80">
-              {/* Decorative paper spine shadow on right edge for 3D realism */}
-              <div className="hidden md:block absolute top-0 bottom-0 right-0 w-8 bg-gradient-to-l from-black/20 to-transparent pointer-events-none" />
-
-              {/* Red blood/ink stain in top corner */}
-              <div className="absolute -top-3 -left-3 pointer-events-none opacity-30">
-                <InkSplatter className="w-16 h-16" />
-              </div>
-
-              <div>
-                {/* Header Date & Title */}
-                <div className="border-b border-[#8F1320]/30 pb-2 mb-4">
-                  <div className="flex items-center justify-between font-mono text-[10px] sm:text-[11px] font-bold text-[#8F1320] uppercase tracking-widest">
-                    <span>{currentSpread.entryDate}</span>
-                    <span>FOLIO #{currentSpread.id * 2 - 1}</span>
-                  </div>
-                  <h3
-                    className="font-serif text-lg sm:text-xl font-bold tracking-tight text-[#1E1513] mt-0.5"
-                    style={{ fontFamily: "'Cinzel', 'Lora', serif" }}
-                  >
-                    {currentSpread.entryTitle}
-                  </h3>
-                </div>
-
-                {/* Mandated Greeting: "hii, I'm..." with name physically torn away / obscured by blood */}
-                <div className="mb-4">
-                  <div className="inline-flex items-center flex-wrap gap-1.5 font-serif text-base sm:text-lg font-bold text-[#1F1513]">
-                    <span className="italic">{currentSpread.leftPage.greetingPrefix}</span>
-                    <span
-                      title="Name torn away and stained with crimson ink"
-                      className="inline-flex items-center px-2 py-0.5 bg-[#4A0A10] text-[#FFC4C8] text-xs sm:text-sm font-mono font-bold tracking-wider rounded-[2px] shadow-inner select-none relative overflow-hidden border border-[#8F1320]"
-                    >
-                      <span className="line-through decoration-[#DE3B4C] decoration-2">
-                        {currentSpread.leftPage.obscuredNameNote}
-                      </span>
-                      {/* Blood overlay texture */}
-                      <span className="absolute inset-0 bg-red-950/60 mix-blend-multiply pointer-events-none" />
-                    </span>
-                    <span>,</span>
-                  </div>
-                </div>
-
-                {/* Condensed Narrative Text in first-person */}
-                <div className="space-y-3 font-serif text-[13.5px] sm:text-[14.5px] leading-relaxed text-[#2B1F1C]">
-                  {currentSpread.leftPage.text.map((paragraph, idx) => (
-                    <p key={idx}>{paragraph}</p>
-                  ))}
-                </div>
-              </div>
-
-              {/* Bottom Signoff */}
-              <div className="pt-4 border-t border-[#B5A17D]/40 font-serif italic text-xs text-[#6B5342]">
-                {currentSpread.leftPage.handwrittenSignoff}
-              </div>
-            </div>
-
-            {/* ================= RIGHT PAGE ================= */}
-            <div className="relative p-4 sm:p-7 flex flex-col justify-between min-h-[360px] sm:min-h-[440px] bg-[#F5EBD4]/90">
-              {/* Decorative paper spine shadow on left edge for 3D realism */}
-              <div className="hidden md:block absolute top-0 bottom-0 left-0 w-8 bg-gradient-to-r from-black/20 to-transparent pointer-events-none" />
-
-              {/* Red blood/ink fingerprint */}
-              <div className="absolute top-2 right-3 pointer-events-none opacity-20">
-                <CrimsonFingerprint className="w-14 h-18" />
-              </div>
-
-              <div>
-                {/* Header Tag */}
-                <div className="border-b border-[#8F1320]/30 pb-2 mb-4 flex items-center justify-between">
-                  <span className="font-mono text-[10px] sm:text-[11px] font-bold text-[#8F1320] uppercase tracking-wider">
-                    {currentSpread.rightPage.exhibitTag}
-                  </span>
-                  <span className="font-mono text-[10px] text-[#7A6455]">
-                    FOLIO #{currentSpread.id * 2}
-                  </span>
-                </div>
-
-                {/* Recovered Visual / Clue Item */}
-                <div className="mb-4">
-                  {currentSpread.rightPage.photoType === 'house' && (
-                    <div className="relative bg-[#2B1B15] p-2.5 rounded shadow-md border border-[#8F1320]/40 -rotate-1">
-                      {/* Washi tape piece */}
-                      <div className="absolute -top-2 left-6 w-12 h-4 bg-[#DFD0AA]/80 border border-[#9A8462] rotate-3 shadow-sm" />
-                      <div className="w-full h-28 bg-[#120D0A] flex flex-col items-center justify-center text-center p-2 rounded">
-                        <span className="text-2xl mb-1">🏡</span>
-                        <span className="font-serif italic text-xs text-[#E8DCB9]">
-                          "A house of golden lamps, warm tea, and unyielding routines."
-                        </span>
-                      </div>
-                      <div className="mt-1 text-[11px] font-mono text-[#E8DCB9]/80 text-center">
-                        {currentSpread.rightPage.caption}
-                      </div>
-                    </div>
-                  )}
-
-                  {currentSpread.rightPage.photoType === 'map' && (
-                    <div className="relative bg-[#F2E8D2] p-2.5 rounded shadow-md border-2 border-dashed border-[#8F1320]/60 rotate-1">
-                      <div className="w-full h-28 bg-[#FAF4E5] flex flex-col items-center justify-center text-center p-2 rounded border border-[#C2B193]">
-                        <span className="text-2xl mb-1">🗺️</span>
-                        <span className="font-serif italic text-xs text-[#4A382C]">
-                          "Lisbon · Prague · Vienna — routes circled in red ink."
-                        </span>
-                      </div>
-                      <div className="mt-1 text-[11px] font-mono text-[#8F1320] text-center font-bold">
-                        {currentSpread.rightPage.caption}
-                      </div>
-                    </div>
-                  )}
-
-                  {currentSpread.rightPage.photoType === 'midnight' && (
-                    <div className="relative bg-[#231A16] p-2.5 rounded shadow-md border border-[#8F1320] -rotate-1">
-                      <div className="w-full h-28 bg-[#0F0A08] flex flex-col items-center justify-center text-center p-2 rounded border border-[#52131A]">
-                        <span className="text-2xl mb-1">🕯️</span>
-                        <span className="font-serif italic text-xs text-[#E8DCB9]">
-                          "The anonymous observer waits outside the light of the cage."
-                        </span>
-                      </div>
-                      <div className="mt-1 text-[11px] font-mono text-[#E8DCB9]/80 text-center">
-                        {currentSpread.rightPage.caption}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* ================= FINAL SPREAD: HIDDEN PASSWORD CLUE ================= */}
-                  {currentSpread.rightPage.isFinalSpread && (
-                    <div
-                      data-testid="hidden-password-clue-box"
-                      className="relative bg-[#FFF7E8] border-2 border-[#8F1320] p-4 rounded shadow-lg text-center space-y-2 -rotate-1"
-                    >
-                      <div className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-[#8F1320]">
-                        ★ CONFIDENTIAL CIPHER KEY ★
-                      </div>
-                      <div className="py-2 px-4 bg-[#8F1320]/10 border-2 border-dashed border-[#8F1320] rounded inline-block">
-                        <span className="font-mono text-2xl font-bold tracking-[0.3em] text-[#8F1320]">
-                          1311
-                        </span>
-                      </div>
-                      <p className="font-serif text-xs text-[#3D2E28] leading-tight">
-                        {currentSpread.rightPage.hiddenPasswordClue?.instruction}
-                      </p>
-
-                      <button
-                        type="button"
-                        data-testid="unlock-envelope-direct-button"
-                        onClick={() => {
-                          onClose();
-                          onProceedToUnlock();
-                        }}
-                        className="w-full py-2.5 px-4 bg-[#8F1320] hover:bg-[#A31525] active:bg-[#6E0E18] text-white font-mono text-xs font-bold uppercase tracking-wider rounded transition-colors shadow-md cursor-pointer flex items-center justify-center gap-2 mt-2"
-                      >
-                        <span>🔓 UNLOCK ENVELOPE (CODE: 1311) →</span>
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                {/* Marginalia Annotations */}
-                <div className="space-y-1.5 pt-2">
-                  {currentSpread.rightPage.annotationNotes.map((note, idx) => (
-                    <div
-                      key={idx}
-                      className="font-mono text-[11px] sm:text-xs text-[#6B4F3B] leading-snug flex items-start gap-1.5"
-                    >
-                      <span className="text-[#8F1320] font-bold">▸</span>
-                      <span>{note}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Bottom Stamp or Exhibit Mark */}
-              <div className="pt-3 border-t border-[#B5A17D]/40 flex items-center justify-between">
-                <ClassifiedStamp text="CASE 1311 // DOSSIER" className="scale-75 origin-left" />
-                <span className="font-mono text-[10px] text-[#7A6455] italic">
-                  Classified Archive 1311
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom Pagination Controls */}
-        <div className="w-full flex items-center justify-between mt-3 px-2">
-          <button
-            type="button"
-            data-testid="diary-prev-button"
-            onClick={handlePrev}
-            disabled={isFirstSpread}
-            className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded font-mono text-[11px] sm:text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 border transition-all cursor-pointer ${
-              isFirstSpread
-                ? 'opacity-30 border-neutral-800 text-neutral-600 cursor-not-allowed'
-                : 'bg-[#231A16] hover:bg-[#382821] text-amber-100 border-[#8F1320]/60'
-            }`}
-          >
-            ← Previous Spread
-          </button>
-
-          <span className="font-mono text-xs text-amber-200/70 tracking-widest">
-            {currentSpreadIndex + 1} / {DIARY_SPREADS.length}
+        <div className="flex items-center gap-3">
+          {/* Natural Page Counter */}
+          <span className="font-serif text-[11px] sm:text-xs text-[#C4B3A3]">
+            {isMobile
+              ? `Page ${pageIndex + 1} of ${totalPages}`
+              : `Pages ${currentSpreadIndex * 2 + 1}–${currentSpreadIndex * 2 + 2} of ${totalPages}`}
           </span>
 
           <button
             type="button"
-            data-testid="diary-next-button"
-            onClick={handleNext}
-            disabled={isLastSpread}
-            className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded font-mono text-[11px] sm:text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 border transition-all cursor-pointer ${
-              isLastSpread
-                ? 'opacity-30 border-neutral-800 text-neutral-600 cursor-not-allowed'
-                : 'bg-[#8F1320] hover:bg-[#A31525] text-amber-100 border-[#DE3B4C]'
-            }`}
+            onClick={onClose}
+            className="px-2.5 py-1 bg-[#8F1320]/25 hover:bg-[#8F1320] text-red-200 hover:text-white text-xs font-bold rounded border border-[#8F1320]/60 transition-colors cursor-pointer flex items-center gap-1 active:scale-95"
           >
-            Next Spread →
+            <span>✕</span>
+            <span>Close Diary</span>
           </button>
         </div>
+      </div>
 
-        {/* Detective Laren Companion Guide in Diary View */}
-        <div className="w-full flex items-center gap-2 mt-2 px-2.5 py-1.5 bg-[#120E0D]/95 border border-[#B45309]/50 rounded-lg text-neutral-300 shadow-lg shrink-0">
-          <div className="relative shrink-0 w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center">
-            <div className="absolute inset-0 rounded-full bg-amber-500/20 blur-xs" />
-            <img
-              src="/assets/detective_laren.webp"
-              alt="Detective Laren"
-              className="w-full h-full object-contain filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]"
-            />
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className="font-mono text-[8.5px] text-[#F59E0B] font-bold tracking-wider uppercase flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#F59E0B] animate-pulse" />
-              <span>DETECTIVE LAREN</span>
+      {/* ================= PHYSICAL ANTIQUE BOOK CONTAINER ================= */}
+      <div
+        className="w-full max-w-4xl flex-1 min-h-0 flex items-center justify-center my-auto touch-pan-y"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
+        {/* Leather Book Cover Wrap & Spine Shadow */}
+        <div className="relative w-full h-full max-h-[58dvh] xs:max-h-[62dvh] sm:max-h-[68vh] md:max-h-[72vh] flex items-center justify-center shadow-[0_25px_60px_rgba(0,0,0,0.95),0_0_25px_rgba(143,19,32,0.3)] rounded-lg p-1.5 xs:p-2 sm:p-4 bg-[#23150F] border-2 sm:border-4 border-[#3D251A]">
+          {/* Aged Leather Border Bevel */}
+          <div className="absolute inset-0 pointer-events-none rounded-lg border border-[#170E0A] opacity-75 shadow-inner" />
+
+          {/* Book Spine Hinges and Stitches on Outer Casing */}
+          <div className="absolute -left-1 top-6 bottom-6 w-1 border-r border-[#4A2D1F]/50 hidden sm:block pointer-events-none" />
+          <div className="absolute -right-1 top-6 bottom-6 w-1 border-l border-[#4A2D1F]/50 hidden sm:block pointer-events-none" />
+
+          {/* ================= DESKTOP VIEW: TWO-PAGE SIDE-BY-SIDE SPREAD ================= */}
+          {!isMobile ? (
+            <div
+              className={`relative w-full h-full grid grid-cols-2 bg-[#F4ECDA] text-[#241A15] rounded border border-[#BFA985] shadow-2xl overflow-hidden transition-all duration-200 ${
+                turnDirection === 'next'
+                  ? 'rotate-y-[-1.5deg] scale-[0.99] opacity-80'
+                  : turnDirection === 'prev'
+                  ? 'rotate-y-[1.5deg] scale-[0.99] opacity-80'
+                  : 'rotate-y-0 scale-100 opacity-100'
+              }`}
+            >
+              {/* Natural Centre Spine Binding / Fold Overlay */}
+              <div className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-8 pointer-events-none z-20 flex justify-center">
+                {/* Deep spine crease shadow */}
+                <div className="w-full h-full bg-gradient-to-r from-transparent via-black/35 to-transparent" />
+                {/* Centre binding thread groove */}
+                <div className="absolute top-0 bottom-0 w-[1.5px] bg-[#3D261E]/40" />
+                {/* Top and Bottom spine stitching marks */}
+                <span className="absolute top-2 w-2 h-0.5 bg-[#8F1320]/70 rounded-full" />
+                <span className="absolute bottom-2 w-2 h-0.5 bg-[#8F1320]/70 rounded-full" />
+              </div>
+
+              {/* Left Page (Spread Left) */}
+              <div className="h-full overflow-hidden">
+                {renderLeftPage(currentSpread, false)}
+              </div>
+
+              {/* Right Page (Spread Right) */}
+              <div className="h-full overflow-hidden">
+                {renderRightPage(currentSpread, false)}
+              </div>
             </div>
-            <p className="font-serif text-[10.5px] sm:text-[11.5px] leading-tight text-[#F5EDE0] truncate sm:whitespace-normal">
-              &ldquo;finally we found the diary! The password should be in the final entry.&rdquo;
-            </p>
+          ) : (
+            /* ================= MOBILE VIEW: ONE COMPLETE DIARY PAGE AT A TIME ================= */
+            <div
+              className={`relative w-full h-full max-w-[420px] mx-auto bg-[#F4ECDA] text-[#241A15] rounded border border-[#BFA985] shadow-2xl overflow-hidden transition-all duration-200 ${
+                turnDirection === 'next'
+                  ? '-translate-x-2 scale-[0.98] opacity-75'
+                  : turnDirection === 'prev'
+                  ? 'translate-x-2 scale-[0.98] opacity-75'
+                  : 'translate-x-0 scale-100 opacity-100'
+              }`}
+            >
+              {/* Mobile Single Page Content */}
+              {isLeftPageOnMobile
+                ? renderLeftPage(currentSpread, true)
+                : renderRightPage(currentSpread, true)}
+
+              {/* Subtle Mobile Edge Tap Hints (Left 15% / Right 15%) */}
+              {!isFirst && (
+                <button
+                  type="button"
+                  onClick={handlePrev}
+                  aria-label="Previous Page"
+                  className="absolute left-0 inset-y-0 w-8 z-10 cursor-pointer focus:outline-none opacity-0 hover:opacity-10 bg-gradient-to-r from-black/20 to-transparent"
+                />
+              )}
+              {!isLast && (
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  aria-label="Next Page"
+                  className="absolute right-0 inset-y-0 w-8 z-10 cursor-pointer focus:outline-none opacity-0 hover:opacity-10 bg-gradient-to-l from-black/20 to-transparent"
+                />
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ================= BOTTOM PAGINATION CONTROLS (Outside Book Pages) ================= */}
+      <div className="w-full max-w-4xl flex items-center justify-between mt-1 px-1 sm:px-2 shrink-0">
+        <button
+          type="button"
+          data-testid="diary-prev-button"
+          onClick={handlePrev}
+          disabled={isFirst}
+          className={`min-h-[40px] px-3 sm:px-4 py-1.5 sm:py-2 rounded font-mono text-[11px] sm:text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 border transition-all cursor-pointer select-none active:scale-95 ${
+            isFirst
+              ? 'opacity-25 border-neutral-800 text-neutral-600 cursor-not-allowed'
+              : 'bg-[#231A16] hover:bg-[#382821] text-amber-100 border-[#8F1320]/60'
+          }`}
+        >
+          <span>←</span>
+          <span>{isMobile ? 'Previous Page' : 'Previous Spread'}</span>
+        </button>
+
+        <span className="font-serif text-xs text-amber-200/80 tracking-widest select-none">
+          {isMobile
+            ? `${pageIndex + 1} / ${totalPages}`
+            : `${currentSpreadIndex + 1} / ${totalSpreads}`}
+        </span>
+
+        <button
+          type="button"
+          data-testid="diary-next-button"
+          onClick={handleNext}
+          disabled={isLast}
+          className={`min-h-[40px] px-3 sm:px-4 py-1.5 sm:py-2 rounded font-mono text-[11px] sm:text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 border transition-all cursor-pointer select-none active:scale-95 ${
+            isLast
+              ? 'opacity-25 border-neutral-800 text-neutral-600 cursor-not-allowed'
+              : 'bg-[#8F1320] hover:bg-[#A31525] text-amber-100 border-[#DE3B4C]'
+          }`}
+        >
+          <span>{isMobile ? 'Next Page' : 'Next Spread'}</span>
+          <span>→</span>
+        </button>
+      </div>
+
+      {/* ================= DETECTIVE LAREN COMPANION (Outside Book, Fixed Area) ================= */}
+      <div className="w-full max-w-4xl flex items-center gap-2 mt-1 sm:mt-1.5 px-2.5 py-1.5 bg-[#120E0D]/95 border border-[#B45309]/50 rounded-lg text-neutral-300 shadow-lg shrink-0">
+        <div className="relative shrink-0 w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center">
+          <div className="absolute inset-0 rounded-full bg-amber-500/20 blur-xs" />
+          <img
+            src="/assets/detective_laren.webp"
+            alt="Detective Laren"
+            className="w-full h-full object-contain filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]"
+          />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="font-mono text-[8.5px] text-[#F59E0B] font-bold tracking-wider uppercase flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#F59E0B] animate-pulse" />
+            <span>DETECTIVE LAREN</span>
           </div>
+          <p className="font-serif text-[10.5px] sm:text-[11.5px] leading-tight text-[#F5EDE0] truncate sm:whitespace-normal">
+            {isLast
+              ? '“Look! There’s the cipher code 1311! That’s the password to unlock the envelope!”'
+              : '“finally we found the diary! The password should be in the final entry.”'}
+          </p>
         </div>
       </div>
     </div>
