@@ -6,6 +6,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { WaxSeal } from './TactileDecorations';
 import { BirthdayMusicBox } from '../utils/birthdayMusic';
+import { PERSONAL_BIRTHDAY_LETTER } from '../data/storyContent';
 
 // Assets
 import crimeEvidenceEnvelopeImg from '../assets/images/crime_evidence_envelope_1793563754168.jpg';
@@ -284,20 +285,34 @@ export function FinalEnvelopeScreen({
                 data-testid="letter-section"
                 className="p-5 sm:p-8 rounded-xl border bg-[#FFFDF8]/95 border-[#FFE5B4] shadow-xs"
               >
-                <div className="pb-2.5 mb-3.5 border-b border-[#E63946]/20">
+                <div className="pb-2.5 mb-4 border-b border-[#E63946]/20 flex items-center justify-between">
                   <h3
                     className="font-serif text-xs sm:text-sm font-bold uppercase tracking-[0.2em] text-[#E63946]"
                     style={{ fontFamily: "'Cinzel', 'Lora', serif" }}
                   >
                     PERSONAL BIRTHDAY LETTER
                   </h3>
+                  <span className="text-sm select-none" aria-hidden="true">💌</span>
                 </div>
 
                 <div
-                  className="font-serif text-sm sm:text-base leading-[1.85] text-[#2C221E] min-h-[180px] whitespace-pre-line"
+                  className="font-serif text-sm sm:text-base leading-[1.85] sm:leading-[1.95] text-[#2C221E] space-y-4 sm:space-y-4.5 tracking-normal break-words"
                   style={{ fontFamily: "'Lora', 'Georgia', serif" }}
                 >
-                  {/* Clean, elegant letter-writing area ready for the personal birthday letter */}
+                  {PERSONAL_BIRTHDAY_LETTER.map((paragraph, idx) => (
+                    <p
+                      key={idx}
+                      className={
+                        idx === 0
+                          ? 'font-bold text-base sm:text-lg text-[#8F1320] pb-1'
+                          : idx === PERSONAL_BIRTHDAY_LETTER.length - 1
+                          ? 'italic text-xs sm:text-sm text-[#7A6455] pt-1'
+                          : undefined
+                      }
+                    >
+                      {paragraph}
+                    </p>
+                  ))}
                 </div>
               </section>
             </article>

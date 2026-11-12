@@ -57,6 +57,22 @@ export interface ExperienceContent {
   };
 }
 
+export const PERSONAL_BIRTHDAY_LETTER: string[] = [
+  "HAPPYYYY BIRTHDAYYYY SANOBERRR! 😼🩵",
+  "I hope this year brings you countless More Books and ofcccc little reasons to smile, stories worth staying up late for, books that leave you speechless, and memories (like me) you'll want to write about a thousand times.",
+  "I hope you get to visit all those places you've imagined (me bhi chlunga plz 😭), walk through unfamiliar streets, discover beautiful little corners of the world, and collect experiences that make you feel truly alive. I hope you never run out of curiosity, never lose your love for writing n reading 💥, and never stop dreaming about the things you haven't experienced yet.",
+  "May you always have the courage to explore your own choices, the freedom to discover yourself, and the comfort of knowing that you are loved and appreciated. I hope life is gentle with you, that you meet people (like me ofc 🙄) who understand the little things about you, and that you never have to question your worth or your place in someone's life.",
+  "And amidst all these wishes, there's one little thing I want to confess. (I'm sorry)",
+  "You've been a special person to me for longer than you probably realise. Five years have passed, so much has changed, and yet there's still a certain fondness I can't quite put into words. I genuinely enjoy knowing you, listening to your thoughts, discovering your little interests and sharing these ordinary conversations with you. I'm glad our paths crossed, and even gladder that they crossed again.",
+  "I don't know what the future holds, and I'm not asking it to promise me anything. I just hope you get the beautiful life you deserve, whether that means adventures you've always dreamed of 😼 , stories you've yet to write (plz start writing something it's cool), or simply peaceful days surrounded by the people you love. (even on days when they drive you crazy 😭)",
+  "Keep reading, keep writing, keep exploring, and never stop being curious about this ridiculously enormous world.",
+  "Here's to another year of being wonderfully, unapologetically YOU.",
+  "Happy Birthday once again, Sanober. Stay happy, stay blessed with my presence, and take care of that little heart of yours. 🩵",
+  "and I LOVE YOU SO MUCHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH (IM SORRY 😭😭💔🥀) I just hope that you'll be lovedddddd! n loved so muchhhh! hum na honge to koi humsa hoga 😞",
+  "I wish u beautiful life and absolute peak life experiences 😼🩷",
+  "(I'll be fasting from Saturday cz i think it's romantic)",
+];
+
 export const EXPERIENCE_CONTENT: ExperienceContent = {
   warning: {
     heading: 'CONTENT WARNING',
@@ -242,11 +258,9 @@ export const EXPERIENCE_CONTENT: ExperienceContent = {
     sealMonogram: '1311',
     buttonText: 'tap to break seal & open letter',
     statementHeading: 'LAST REPORTED STATEMENT',
-    statementPlaceholder:
-      '[LAST REPORTED STATEMENT]\n\nReserved for the secret admirer’s final recorded statement.\n(Replace this editable block with your statement text when ready.)',
+    statementPlaceholder: '',
     letterHeading: 'PERSONAL BIRTHDAY LETTER',
-    letterPlaceholder:
-      'Dear Sanober,\n\n[LETTER CONTENT]\n\nReserved for the personal birthday letter, warmest wishes, inside memories, and humorous birthday roast.\n(Replace this editable block with your birthday letter text when ready.)',
+    letterPlaceholder: PERSONAL_BIRTHDAY_LETTER.join('\n\n'),
   },
 };
 

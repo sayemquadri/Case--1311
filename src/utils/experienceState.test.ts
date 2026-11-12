@@ -25,7 +25,7 @@ import {
   handleNextDiaryPage,
   handlePrevDiaryPage,
 } from './experienceState';
-import { EXPERIENCE_CONTENT, DIARY_SPREADS } from '../data/storyContent';
+import { EXPERIENCE_CONTENT, DIARY_SPREADS, PERSONAL_BIRTHDAY_LETTER } from '../data/storyContent';
 
 test('initial state begins at opening screen with sealed envelope', () => {
   const state = createInitialExperienceState();
@@ -268,5 +268,23 @@ test('new 8-page diary story "THE GIRL WHO KEPT A THOUSAND STORIES" conforms to 
   assert.ok(s4.rightPage.hiddenPasswordClue?.handwrittenLines?.some((l) => l.includes('Every mystery has a key')));
   assert.equal(s4.rightPage.hiddenPasswordClue?.calendarDetail?.month, 'NOVEMBER');
   assert.equal(s4.rightPage.hiddenPasswordClue?.calendarDetail?.circledDay, 13);
+});
+
+test('PERSONAL_BIRTHDAY_LETTER contains exact letter text, emojis, and all paragraphs', () => {
+  assert.equal(PERSONAL_BIRTHDAY_LETTER.length, 13);
+  assert.equal(PERSONAL_BIRTHDAY_LETTER[0], 'HAPPYYYY BIRTHDAYYYY SANOBERRR! 😼🩵');
+  assert.ok(PERSONAL_BIRTHDAY_LETTER[1].includes('I hope this year brings you countless More Books'));
+  assert.ok(PERSONAL_BIRTHDAY_LETTER[2].includes('(me bhi chlunga plz 😭)'));
+  assert.ok(PERSONAL_BIRTHDAY_LETTER[3].includes('(like me ofc 🙄)'));
+  assert.ok(PERSONAL_BIRTHDAY_LETTER[4].includes("there's one little thing I want to confess. (I'm sorry)"));
+  assert.ok(PERSONAL_BIRTHDAY_LETTER[5].includes('Five years have passed, so much has changed'));
+  assert.ok(PERSONAL_BIRTHDAY_LETTER[6].includes('(plz start writing something it\'s cool)'));
+  assert.ok(PERSONAL_BIRTHDAY_LETTER[7].includes('Keep reading, keep writing, keep exploring'));
+  assert.ok(PERSONAL_BIRTHDAY_LETTER[8].includes('wonderfully, unapologetically YOU'));
+  assert.ok(PERSONAL_BIRTHDAY_LETTER[9].includes('Happy Birthday once again, Sanober. Stay happy, stay blessed with my presence'));
+  assert.ok(PERSONAL_BIRTHDAY_LETTER[10].includes('I LOVE YOU SO MUCHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH (IM SORRY 😭😭💔🥀)'));
+  assert.ok(PERSONAL_BIRTHDAY_LETTER[10].includes('hum na honge to koi humsa hoga 😞'));
+  assert.ok(PERSONAL_BIRTHDAY_LETTER[11].includes('absolute peak life experiences 😼🩷'));
+  assert.equal(PERSONAL_BIRTHDAY_LETTER[12], "(I'll be fasting from Saturday cz i think it's romantic)");
 });
 
