@@ -4,7 +4,6 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import { EXPERIENCE_CONTENT } from '../data/storyContent';
 import { WaxSeal } from './TactileDecorations';
 import { BirthdayMusicBox } from '../utils/birthdayMusic';
 
@@ -24,10 +23,8 @@ export function FinalEnvelopeScreen({
   onReturnToCctv,
   defaultRevealed = false,
 }: FinalEnvelopeScreenProps) {
-  const { envelope } = EXPERIENCE_CONTENT;
   const [step, setStep] = useState<AnimationStep>(defaultRevealed ? 'unfolded' : 'sealed');
   const [isBirthdayMode, setIsBirthdayMode] = useState<boolean>(defaultRevealed);
-  const [isMusicPlaying, setIsMusicPlaying] = useState<boolean>(false);
 
   const musicBoxRef = useRef<BirthdayMusicBox | null>(null);
 
@@ -35,20 +32,26 @@ export function FinalEnvelopeScreen({
   useEffect(() => {
     musicBoxRef.current = new BirthdayMusicBox();
     if (defaultRevealed) {
-      triggerBirthdaySurprise();
+      setIsBirthdayMode(true);
+      musicBoxRef.current.play();
     }
     return () => {
       musicBoxRef.current?.stop();
     };
-  }, []);
+  }, [defaultRevealed]);
 
   // Handle start reveal sequence
   const handleStartReveal = () => {
     if (step !== 'sealed') return;
 
+    // Automatic Birthday Music: Starts immediately on the envelope-opening user interaction with gentle audio fade-in
+    if (musicBoxRef.current) {
+      musicBoxRef.current.play();
+    }
+
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       setStep('unfolded');
-      triggerBirthdaySurprise();
+      setIsBirthdayMode(true);
       return;
     }
 
@@ -64,34 +67,8 @@ export function FinalEnvelopeScreen({
 
     setTimeout(() => {
       setStep('unfolded');
-      // Transition immediately into celebration mode once unfolded
-      setTimeout(() => {
-        triggerBirthdaySurprise();
-      }, 600);
+      setIsBirthdayMode(true);
     }, 1450);
-  };
-
-  const triggerBirthdaySurprise = () => {
-    setIsBirthdayMode(true);
-    if (musicBoxRef.current && !isMusicPlaying) {
-      musicBoxRef.current.play();
-      setIsMusicPlaying(true);
-    }
-  };
-
-  const toggleMusic = () => {
-    if (!musicBoxRef.current) return;
-    const playing = musicBoxRef.current.toggleMute();
-    setIsMusicPlaying(playing);
-  };
-
-  const handleReseal = () => {
-    setStep('sealed');
-    setIsBirthdayMode(false);
-    if (musicBoxRef.current) {
-      musicBoxRef.current.stop();
-      setIsMusicPlaying(false);
-    }
   };
 
   const isRevealed = step === 'unfolded';
@@ -100,14 +77,14 @@ export function FinalEnvelopeScreen({
   return (
     <section
       data-testid="final-envelope-screen"
-      className={`fixed inset-0 w-screen h-[100dvh] transition-colors duration-1000 flex flex-col items-center select-none ${
+      className={`fixed inset-0 w-screen h-[100dvh] transition-colors duration-1000 flex flex-col items-center ${
         isRevealed
-          ? 'justify-between overflow-y-auto p-3 sm:p-6'
-          : 'justify-center p-3 sm:p-4 overflow-hidden'
+          ? 'overflow-y-auto p-3 sm:p-6 md:p-8 select-text'
+          : 'justify-center p-3 sm:p-4 overflow-hidden select-none'
       } ${
         isBirthdayMode ? 'bg-[#FFF8F0] text-[#2C221E]' : 'bg-[#080707] text-[#D5C19B]'
       }`}
-      aria-label="Final Letter Presentation Screen"
+      aria-label="Final Envelope Screen"
       style={
         isBirthdayMode
           ? {
@@ -122,52 +99,18 @@ export function FinalEnvelopeScreen({
       {/* ================= FLOATING BIRTHDAY CELEBRATION PARTICLES ================= */}
       {isBirthdayMode && (
         <div className="fixed inset-0 pointer-events-none z-10 overflow-hidden">
-          <div className="absolute top-10 left-8 text-2xl animate-bounce opacity-80">🌸</div>
-          <div className="absolute top-24 right-12 text-3xl animate-pulse opacity-75">🍒</div>
-          <div className="absolute top-1/3 left-16 text-xl animate-spin opacity-70">🌸</div>
-          <div className="absolute top-1/2 right-20 text-2xl animate-bounce opacity-80">✨</div>
-          <div className="absolute bottom-24 left-10 text-3xl opacity-75">🎈</div>
-          <div className="absolute bottom-32 right-14 text-3xl opacity-80">🎂</div>
-          <div className="absolute top-0 inset-x-0 h-40 bg-gradient-to-b from-pink-300/20 via-yellow-200/10 to-transparent" />
+          <div className="absolute top-8 left-6 text-2xl animate-bounce opacity-80">🌸</div>
+          <div className="absolute top-20 right-10 text-3xl animate-pulse opacity-75">🍒</div>
+          <div className="absolute top-1/3 left-12 text-xl animate-spin opacity-70">🌸</div>
+          <div className="absolute top-1/2 right-16 text-2xl animate-bounce opacity-80">✨</div>
+          <div className="absolute bottom-20 left-8 text-3xl opacity-75">🎈</div>
+          <div className="absolute bottom-28 right-12 text-3xl opacity-80">🎂</div>
+          <div className="absolute top-0 inset-x-0 h-48 bg-gradient-to-b from-pink-300/25 via-yellow-100/15 to-transparent" />
         </div>
       )}
 
-      {/* ================= TOP HEADER (CELEBRATION MODE ONLY) ================= */}
-      {isBirthdayMode && (
-        <header className="relative z-20 w-full max-w-2xl flex flex-col sm:flex-row items-center justify-between gap-2.5 border-b pb-2 pt-2 px-3 transition-colors duration-500 shrink-0 border-[#E63946]/40 text-[#8B1E2B] bg-white/85 backdrop-blur-md rounded-lg shadow-sm mb-2">
-          <div className="flex items-center gap-2">
-            <span className="font-mono text-xs sm:text-sm tracking-[0.2em] font-bold uppercase text-center sm:text-left text-[#E63946]">
-              🎉 BIRTHDAY CELEBRATION
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2 flex-wrap justify-center">
-            <button
-              type="button"
-              data-testid="toggle-birthday-melody-button"
-              onClick={toggleMusic}
-              className="flex items-center gap-1.5 px-3 py-1 bg-[#FFF0F3] hover:bg-[#FFE3E8] border border-[#E63946] text-[#E63946] font-mono text-[11px] font-bold rounded-full shadow cursor-pointer transition-transform active:scale-95"
-              title="Toggle Happy Birthday Chime Melody"
-            >
-              <span>{isMusicPlaying ? '🎵' : '🔇'}</span>
-              <span>{isMusicPlaying ? 'Melody: PLAYING' : 'Melody: MUTED'}</span>
-            </button>
-
-            {onReturnToCctv && (
-              <button
-                type="button"
-                onClick={onReturnToCctv}
-                className="font-mono text-[11px] tracking-wider transition-colors cursor-pointer py-1 px-2.5 rounded border bg-white text-[#8B1E2B] hover:text-[#E63946] border-[#E63946]/40"
-              >
-                ← Back to CCTV
-              </button>
-            )}
-          </div>
-        </header>
-      )}
-
-      {/* ================= MAIN CONTENT AREA ================= */}
-      <div className={`relative z-20 w-full flex flex-col items-center justify-center ${isRevealed ? 'my-auto py-4 max-w-xl' : 'max-w-md'}`}>
+      {/* ================= MAIN CONTENT ================= */}
+      <div className={`relative z-20 w-full flex flex-col items-center ${isRevealed ? 'max-w-2xl mx-auto my-auto py-4 sm:py-6' : 'max-w-md'}`}>
         {!isRevealed ? (
           /* ================= MINIMAL, ELEGANT SEALED ENVELOPE ================= */
           <div className="flex flex-col items-center w-full">
@@ -269,105 +212,94 @@ export function FinalEnvelopeScreen({
             </div>
           </div>
         ) : (
-          /* ================= FULLY UNFOLDED PERSONAL LETTER / CELEBRATION ================= */
-          <div className="w-full space-y-6">
-            {/* Surprise Celebration Banner */}
+          /* ================= JOYFUL, POLISHED BIRTHDAY CELEBRATION & LETTER ================= */
+          <div className="w-full space-y-5 sm:space-y-6">
+            {/* Cheerful Birthday Greeting Banner */}
             <div
-              className="w-full p-5 rounded-lg shadow-2xl text-center text-white space-y-2 border-2 border-pink-200"
+              className="w-full p-6 sm:p-8 rounded-2xl shadow-xl text-center text-white space-y-2 border border-pink-200/90 relative overflow-hidden"
               style={{
                 backgroundImage: `
-                  linear-gradient(135deg, rgba(255, 107, 107, 0.92), rgba(255, 209, 102, 0.92)),
+                  linear-gradient(135deg, rgba(255, 107, 107, 0.94), rgba(255, 209, 102, 0.94)),
                   url(${birthdayScrapbookImg})
                 `,
                 backgroundSize: 'cover',
+                backgroundPosition: 'center',
               }}
             >
-              <div className="text-3xl sm:text-4xl font-extrabold tracking-wide uppercase drop-shadow">
+              <div className="text-3xl xs:text-4xl sm:text-5xl font-black tracking-wide uppercase drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]">
                 🎂 HAPPY BIRTHDAY! 🌸
               </div>
-              <p className="font-sans text-xs sm:text-sm font-semibold text-white/95 drop-shadow">
-                The mystery is solved! May your year be filled with sunshine, cherry blossoms, and endless freedom! ✨
+              <p className="font-sans text-xs sm:text-sm font-semibold text-white/95 drop-shadow-[0_1px_2px_rgba(0,0,0,0.2)] max-w-md mx-auto leading-relaxed">
+                May your year be filled with sunshine, cherry blossoms, and endless adventures! ✨
               </p>
             </div>
 
-            {/* The Unfolded Letter Article */}
+            {/* The Main Letter Card */}
             <article
               data-testid="unfolded-letter-card"
-              className="relative w-full rounded-lg p-6 sm:p-9 md:p-12 shadow-[0_25px_70px_rgba(0,0,0,0.5)] border bg-[#FFFDF9]/95 border-[#FFCCD5] text-[#2C221E] backdrop-blur-md"
+              className="relative w-full rounded-2xl p-5 sm:p-8 md:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.08)] border bg-[#FFFDF9]/95 border-[#FFCCD5] text-[#2C221E] backdrop-blur-md"
             >
-              {/* Scrapbook stickers in Birthday Mode */}
-              <div className="absolute -top-3 left-6 px-3 py-1 bg-[#FFD166] text-[#6A4C00] font-sans text-xs font-bold rounded shadow transform -rotate-3">
+              {/* Decorative Stickers (Non-interactive) */}
+              <div className="absolute -top-3 left-6 px-3 py-1 bg-[#FFD166] text-[#6A4C00] font-sans text-xs font-bold rounded shadow transform -rotate-3 select-none pointer-events-none">
                 🍒 Cherry & Sunshine
               </div>
-              <div className="absolute -top-3 right-6 px-3 py-1 bg-[#FF6B6B] text-white font-sans text-xs font-bold rounded shadow transform rotate-3">
+              <div className="absolute -top-3 right-6 px-3 py-1 bg-[#FF6B6B] text-white font-sans text-xs font-bold rounded shadow transform rotate-3 select-none pointer-events-none">
                 🌈 Rainbow & Joy
               </div>
 
-              {/* Letter Header */}
-              <div className="border-b-2 pb-4 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-[#FFCCD5]">
-                <div>
-                  <h2
-                    className="font-serif text-xl sm:text-2xl font-bold tracking-tight text-[#4A0A10]"
-                    style={{ fontFamily: "'Cinzel', 'Lora', serif" }}
-                  >
-                    A CELEBRATION FOR THE RECORD
-                  </h2>
-                </div>
+              {/* Elegant Heading */}
+              <div className="border-b pb-3 mb-6 flex items-center justify-center border-[#FFCCD5]">
+                <h2
+                  className="font-serif text-base sm:text-xl md:text-2xl font-bold tracking-widest text-[#4A0A10] text-center"
+                  style={{ fontFamily: "'Cinzel', 'Lora', serif" }}
+                >
+                  A LITTLE SOMETHING FOR YOU
+                </h2>
               </div>
 
-              {/* SECTION 1: STATEMENT */}
+              {/* SECTION 1: LAST REPORTED STATEMENT */}
               <section
                 data-testid="statement-section"
-                className="p-4 sm:p-5 rounded-[4px] mb-8 border bg-[#FFF9FA] border-[#FFD6DC]"
+                className="p-5 sm:p-7 rounded-xl mb-6 border bg-[#FFF9FA]/90 border-[#FFD6DC] shadow-xs"
               >
-                <div className="flex items-center justify-between pb-2 mb-3 border-b border-[#E63946]/20">
-                  <h3 className="font-mono text-xs sm:text-sm font-bold uppercase tracking-[0.18em] text-[#E63946]">
-                    {envelope.statementHeading}
+                <div className="pb-2.5 mb-3.5 border-b border-[#E63946]/20">
+                  <h3
+                    className="font-serif text-xs sm:text-sm font-bold uppercase tracking-[0.2em] text-[#E63946]"
+                    style={{ fontFamily: "'Cinzel', 'Lora', serif" }}
+                  >
+                    LAST REPORTED STATEMENT
                   </h3>
                 </div>
 
                 <div
-                  className="font-serif text-sm sm:text-base leading-relaxed whitespace-pre-line tracking-normal text-[#241A15]"
+                  className="font-serif text-sm sm:text-base leading-relaxed text-[#2C221E] min-h-[90px] whitespace-pre-line"
                   style={{ fontFamily: "'Lora', 'Georgia', serif" }}
                 >
-                  {envelope.statementPlaceholder}
+                  {/* Clean, dedicated space ready for the actual statement */}
                 </div>
               </section>
 
               {/* SECTION 2: PERSONAL BIRTHDAY LETTER */}
               <section
                 data-testid="letter-section"
-                className="p-4 sm:p-6 rounded-[4px] mb-6 border bg-[#FFFDF8] border-[#FFE5B4] shadow-sm"
+                className="p-5 sm:p-8 rounded-xl border bg-[#FFFDF8]/95 border-[#FFE5B4] shadow-xs"
               >
-                <div className="flex items-center justify-between pb-2 mb-3 border-b border-[#E63946]/20">
-                  <h3 className="font-mono text-xs sm:text-sm font-bold uppercase tracking-[0.18em] text-[#E63946]">
-                    {envelope.letterHeading}
+                <div className="pb-2.5 mb-3.5 border-b border-[#E63946]/20">
+                  <h3
+                    className="font-serif text-xs sm:text-sm font-bold uppercase tracking-[0.2em] text-[#E63946]"
+                    style={{ fontFamily: "'Cinzel', 'Lora', serif" }}
+                  >
+                    PERSONAL BIRTHDAY LETTER
                   </h3>
                 </div>
 
                 <div
-                  className="font-serif text-sm sm:text-base leading-[1.85] whitespace-pre-line tracking-normal text-[#241A15]"
+                  className="font-serif text-sm sm:text-base leading-[1.85] text-[#2C221E] min-h-[180px] whitespace-pre-line"
                   style={{ fontFamily: "'Lora', 'Georgia', serif" }}
                 >
-                  {envelope.letterPlaceholder}
-                </div>
-
-                <div className="mt-4 pt-3 border-t text-[11px] font-mono italic text-[#E63946] border-[#FFD6DC]">
-                  ~~ Happy Birthday, Sanober! The story has opened into sunshine and flowers ~~
+                  {/* Clean, elegant letter-writing area ready for the personal birthday letter */}
                 </div>
               </section>
-
-              {/* Footer inside letter */}
-              <div className="pt-4 border-t border-[#38271D]/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-[11px] font-mono text-[#7A6455]">
-                <span>A PERSONAL LETTER // CONGRATULATIONS</span>
-                <button
-                  type="button"
-                  onClick={handleReseal}
-                  className="underline hover:text-[#9E2934] cursor-pointer py-1"
-                >
-                  [re-fold & re-seal letter]
-                </button>
-              </div>
             </article>
           </div>
         )}

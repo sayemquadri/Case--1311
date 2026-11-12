@@ -62,6 +62,7 @@ const MELODY: Note[] = [
 
 export class BirthdayMusicBox {
   private ctx: AudioContext | null = null;
+  private masterGain: GainNode | null = null;
   private isPlaying = false;
   private isMuted = false;
   private timeoutIds: number[] = [];
@@ -75,6 +76,9 @@ export class BirthdayMusicBox {
       const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       if (AudioCtx) {
         this.ctx = new AudioCtx();
+        this.masterGain = this.ctx.createGain();
+        this.masterGain.gain.setValueAtTime(0.001, this.ctx.currentTime);
+        this.masterGain.connect(this.ctx.destination);
       }
     }
     if (this.ctx && this.ctx.state === 'suspended') {
@@ -86,6 +90,13 @@ export class BirthdayMusicBox {
     this.initCtx();
     if (!this.ctx || this.isPlaying) return;
     this.isPlaying = true;
+    if (this.masterGain) {
+      const now = this.ctx.currentTime;
+      this.masterGain.gain.cancelScheduledValues(now);
+      this.masterGain.gain.setValueAtTime(0.001, now);
+      // Gentle audio fade-in over 1.8 seconds
+      this.masterGain.gain.linearRampToValueAtTime(1.0, now + 1.8);
+    }
     this.scheduleMelody();
   }
 
@@ -175,7 +186,7 @@ export class BirthdayMusicBox {
       osc1.connect(gainNode);
       osc2.connect(overtoneGain);
       overtoneGain.connect(gainNode);
-      gainNode.connect(this.ctx.destination);
+      gainNode.connect(this.masterGain || this.ctx.destination);
 
       osc1.start(now);
       osc2.start(now);
