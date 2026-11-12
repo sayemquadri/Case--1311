@@ -214,7 +214,7 @@ export function CctvSurveillanceScreen({
   // Contextual dialogue for Detective Laren
   const getLarenDialogue = (): string => {
     if (isPasswordModalOpen || (selectedCamId === 'cam04' && hasTappedLockedEnvelope && !unlocked)) {
-      return "The password SHOULD be in the diary! Let's go back and check the final entry.";
+      return "Maybe the password is hidden somewhere in the diary. We should read it first!";
     }
     if (selectedCamId === 'cam03') {
       return "finally we found the diary! Interesting, we should read it, tap into it!";

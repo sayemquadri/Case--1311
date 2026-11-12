@@ -108,9 +108,19 @@ export function WaxSeal({
       />
       {/* Inner embossed rim */}
       <div className="absolute inset-2 rounded-full border border-[#d62b3f]/40 flex items-center justify-center shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)]">
-        <span className="font-mono font-bold text-xs sm:text-sm tracking-wider text-[#ffd0d5] drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] select-none">
-          {monogram}
-        </span>
+        {/* Subtle embossed decorative seal emblem */}
+        <svg
+          viewBox="0 0 32 32"
+          className="w-6 h-6 sm:w-7 sm:h-7 text-[#ffd0d5]/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]"
+          fill="currentColor"
+          aria-hidden="true"
+        >
+          <circle cx="16" cy="16" r="13" stroke="currentColor" strokeWidth="1" fill="none" opacity="0.5" strokeDasharray="2 1" />
+          <path
+            d="M16 6 C17 10 19 12 23 12 C19 14 17 16 17 20 C20 18 22 19 23 22 C20 23 18 23 16 26 C14 23 12 23 9 22 C10 19 12 18 15 20 C15 16 13 14 9 12 C13 12 15 10 16 6 Z"
+            opacity="0.95"
+          />
+        </svg>
       </div>
     </button>
   );
