@@ -287,7 +287,7 @@ export function InteractiveDiaryModal({
             data-testid="diary-prev-button"
             onClick={handlePrev}
             disabled={isFirstSpread}
-            className={`px-4 py-2 rounded font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 border transition-all cursor-pointer ${
+            className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded font-mono text-[11px] sm:text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 border transition-all cursor-pointer ${
               isFirstSpread
                 ? 'opacity-30 border-neutral-800 text-neutral-600 cursor-not-allowed'
                 : 'bg-[#231A16] hover:bg-[#382821] text-amber-100 border-[#8F1320]/60'
@@ -305,7 +305,7 @@ export function InteractiveDiaryModal({
             data-testid="diary-next-button"
             onClick={handleNext}
             disabled={isLastSpread}
-            className={`px-4 py-2 rounded font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 border transition-all cursor-pointer ${
+            className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded font-mono text-[11px] sm:text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 border transition-all cursor-pointer ${
               isLastSpread
                 ? 'opacity-30 border-neutral-800 text-neutral-600 cursor-not-allowed'
                 : 'bg-[#8F1320] hover:bg-[#A31525] text-amber-100 border-[#DE3B4C]'
@@ -313,6 +313,27 @@ export function InteractiveDiaryModal({
           >
             Next Spread →
           </button>
+        </div>
+
+        {/* Detective Laren Companion Guide in Diary View */}
+        <div className="w-full flex items-center gap-2 mt-2 px-2.5 py-1.5 bg-[#120E0D]/95 border border-[#B45309]/50 rounded-lg text-neutral-300 shadow-lg shrink-0">
+          <div className="relative shrink-0 w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center">
+            <div className="absolute inset-0 rounded-full bg-amber-500/20 blur-xs" />
+            <img
+              src="/assets/detective_laren.webp"
+              alt="Detective Laren"
+              className="w-full h-full object-contain filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]"
+            />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="font-mono text-[8.5px] text-[#F59E0B] font-bold tracking-wider uppercase flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#F59E0B] animate-pulse" />
+              <span>DETECTIVE LAREN</span>
+            </div>
+            <p className="font-serif text-[10.5px] sm:text-[11.5px] leading-tight text-[#F5EDE0] truncate sm:whitespace-normal">
+              &ldquo;finally we found the diary! The password should be in the final entry.&rdquo;
+            </p>
+          </div>
         </div>
       </div>
     </div>

@@ -175,18 +175,16 @@ export function CctvSurveillanceScreen({
     return () => clearInterval(flickerInterval);
   }, []);
 
-  const toggleAudio = () => {
-    if (!audioRef.current) return;
-    if (isAudioRunning) {
-      audioRef.current.stop();
-      setIsAudioRunning(false);
-    } else {
+  // Handle ambient sound start on first user interaction
+  const handleUserInteractionSound = () => {
+    if (audioRef.current && !isAudioRunning) {
       audioRef.current.start();
       setIsAudioRunning(true);
     }
   };
 
   const handleOpenDiary = () => {
+    handleUserInteractionSound();
     audioRef.current?.playPaperTurn();
     setIsDiaryOpen(true);
   };
@@ -196,6 +194,7 @@ export function CctvSurveillanceScreen({
   };
 
   const handleEnvelopeClick = () => {
+    handleUserInteractionSound();
     if (unlocked) {
       audioRef.current?.playSealCrack();
       onDirectOpenEnvelope();
@@ -215,7 +214,7 @@ export function CctvSurveillanceScreen({
   // Contextual dialogue for Detective Laren
   const getLarenDialogue = (): string => {
     if (isPasswordModalOpen || (selectedCamId === 'cam04' && hasTappedLockedEnvelope && !unlocked)) {
-      return "Ohh we require a password! It should be on the diary! We should find it";
+      return "The password SHOULD be in the diary! Let's go back and check the final entry.";
     }
     if (selectedCamId === 'cam03') {
       return "finally we found the diary! Interesting, we should read it, tap into it!";
@@ -233,7 +232,10 @@ export function CctvSurveillanceScreen({
     return (
       <section
         className="relative w-screen h-[100dvh] bg-[#000000] flex flex-col items-center justify-center select-none overflow-hidden"
-        onClick={() => setStartupStage('ready')}
+        onClick={() => {
+          handleUserInteractionSound();
+          setStartupStage('ready');
+        }}
         aria-label="CCTV Startup"
       >
         {startupStage === 'startup' && (
@@ -264,6 +266,8 @@ export function CctvSurveillanceScreen({
   return (
     <section
       data-testid="cctv-surveillance-screen"
+      onClick={handleUserInteractionSound}
+      onTouchStart={handleUserInteractionSound}
       className="relative w-screen h-[100dvh] bg-[#050505] text-neutral-200 overflow-hidden flex flex-col justify-between select-none"
       aria-label="CCTV Surveillance Control Room"
     >
@@ -298,15 +302,15 @@ export function CctvSurveillanceScreen({
       {/* Surveillance Camera Outer Frame Border & Subtle Vignette */}
       <div className="absolute inset-0 pointer-events-none z-20 border-[3px] sm:border-[6px] border-black/80 shadow-[inset_0_0_50px_rgba(0,0,0,0.65)]" />
 
-      {/* ================= TOP HUD ================= */}
-      <header className="relative z-30 px-3 py-2 sm:px-4 sm:py-2.5 flex items-center justify-between font-mono text-xs tracking-wider text-[#E83B46] bg-black/85 backdrop-blur-md border-b border-[#8F1320]/40">
+      {/* ================= TOP HUD: Essential Navigation, Single REC, Single Timestamp ================= */}
+      <header className="relative z-30 px-2.5 py-1.5 sm:px-4 sm:py-2 flex items-center justify-between font-mono text-xs tracking-wider text-[#E83B46] bg-black/85 backdrop-blur-md border-b border-[#8F1320]/40 shrink-0">
         <div className="flex items-center gap-2 sm:gap-3">
           {selectedCamId !== null ? (
             <button
               type="button"
               data-testid="back-to-cameras-button"
               onClick={() => setSelectedCamId(null)}
-              className="flex items-center gap-1.5 px-2.5 py-1 bg-[#8F1320]/25 hover:bg-[#8F1320]/50 border border-[#8F1320] text-[#FFCCD5] rounded-[2px] transition-colors cursor-pointer text-[10px] sm:text-xs font-bold"
+              className="flex items-center gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-1 bg-[#8F1320]/25 hover:bg-[#8F1320]/50 border border-[#8F1320] text-[#FFCCD5] rounded-[2px] transition-colors cursor-pointer text-[10px] sm:text-xs font-bold"
             >
               <span>←</span>
               <span>ALL CAMERAS</span>
@@ -319,63 +323,53 @@ export function CctvSurveillanceScreen({
           )}
 
           {selectedCamId !== null && (
-            <div className="flex items-center gap-1.5 font-bold tracking-wider text-[#FF4D5A] ml-1">
+            <div className="flex items-center gap-1.5 font-bold tracking-wider text-[#FF4D5A]">
               <span className="w-2 h-2 rounded-full bg-[#E83B46] animate-ping" />
               <span>● REC</span>
-              <span className="text-neutral-500 hidden sm:inline">|</span>
-              <span className="text-neutral-300 hidden sm:inline text-[11px]">
-                {selectedCamera?.fullName}
-              </span>
             </div>
           )}
         </div>
 
-        {/* Timestamp and Audio Toggle */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        {/* Single Clean Timestamp in Top Bar */}
+        <div className="flex items-center">
           <span className="font-mono text-[10px] sm:text-xs text-neutral-300 font-bold tracking-wider">
             {currentTimeStr || '13 NOV 2026  11:47:32 PM'}
           </span>
-
-          <button
-            type="button"
-            onClick={toggleAudio}
-            className="px-2 py-0.5 bg-[#8F1320]/20 hover:bg-[#8F1320]/40 border border-[#8F1320] text-[#FF9EAA] font-mono text-[9px] sm:text-[10px] font-bold rounded cursor-pointer transition-colors"
-            title="Toggle CCTV tape & surveillance atmosphere hum"
-          >
-            {isAudioRunning ? '🔊 HUM: ON' : '🔈 HUM: OFF'}
-          </button>
         </div>
       </header>
 
       {/* ================= MAIN CONTENT: GRID OR FULL-SCREEN CAMERA ================= */}
-      <main className="relative flex-1 w-full h-full flex flex-col items-center justify-center overflow-y-auto overflow-x-hidden p-2 sm:p-4">
+      <main className="relative flex-1 min-h-0 w-full flex flex-col items-center justify-center overflow-hidden p-1 sm:p-2.5">
         {selectedCamId === null ? (
-          /* ================= 1. CAMERA SELECTION VIEW ================= */
-          <div className="w-full max-w-4xl flex flex-col items-center my-auto">
-            {/* Small Heading */}
-            <div className="w-full flex items-center justify-between mb-2 sm:mb-3 px-1">
-              <div className="flex items-center gap-2">
+          /* ================= 1. CAMERA SELECTION VIEW (2-column x 3-row layout occupying almost entire viewport) ================= */
+          <div className="w-full h-full flex flex-col justify-between max-w-4xl mx-auto flex-1 min-h-0">
+            {/* Slim Heading Bar */}
+            <div className="w-full flex items-center justify-between px-1 mb-1 shrink-0">
+              <div className="flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 bg-[#E83B46] rounded-full" />
-                <h1 className="font-mono text-[11px] sm:text-xs tracking-[0.22em] text-[#FF4D5A] uppercase font-bold">
-                  SELECT A CAMERA TO INVESTIGATE
+                <h1 className="font-mono text-[10px] sm:text-xs tracking-[0.2em] text-[#FF4D5A] uppercase font-bold">
+                  SELECT CAMERA FEED [6/6]
                 </h1>
               </div>
-              <span className="font-mono text-[10px] text-neutral-500 uppercase tracking-widest hidden sm:inline">
-                LIVE FEEDS: [ 6 / 6 ]
+              <span className="font-mono text-[9px] text-neutral-500 uppercase tracking-widest hidden sm:inline">
+                ALL SYSTEMS OPERATIONAL
               </span>
             </div>
 
-            {/* Clean 2-Column Mobile Grid of 6 CCTV Previews */}
-            <div className="w-full grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3.5">
+            {/* 2-Column x 3-Row Grid Occupying Full Available Screen Height */}
+            <div className="w-full grid grid-cols-2 grid-rows-3 gap-1.5 sm:gap-2 flex-1 min-h-0">
               {CAMERAS.map((cam) => (
                 <button
                   key={cam.id}
                   type="button"
                   data-testid={`camera-card-${cam.id}`}
-                  onClick={() => setSelectedCamId(cam.id)}
-                  className="group relative w-full aspect-[16/9] bg-black rounded-[2px] overflow-hidden border border-[#8F1320]/35 hover:border-[#E83B46] focus:border-[#E83B46] focus:outline-none transition-all duration-200 cursor-pointer shadow-[0_4px_16px_rgba(0,0,0,0.8)] text-left"
+                  onClick={() => {
+                    handleUserInteractionSound();
+                    setSelectedCamId(cam.id);
+                  }}
+                  className="group relative w-full h-full min-h-0 bg-black rounded-[2px] overflow-hidden border border-[#8F1320]/40 hover:border-[#E83B46] focus:border-[#E83B46] focus:outline-none transition-all duration-200 cursor-pointer shadow-[0_4px_16px_rgba(0,0,0,0.8)] text-left flex flex-col"
                 >
-                  {/* Camera Footage Snapshot - CAM 03 and CAM 04 retain clear, normal illumination */}
+                  {/* Camera Footage Snapshot */}
                   <img
                     src={cam.src}
                     alt={cam.fullName}
@@ -426,21 +420,21 @@ export function CctvSurveillanceScreen({
                     />
                   )}
 
-                  {/* Top Overlay: Camera Number, Location, and REC */}
-                  <div className="absolute top-1.5 inset-x-1.5 flex items-center justify-between font-mono text-[8px] sm:text-[10px] text-white tracking-wider pointer-events-none drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]">
-                    <span className="font-bold text-neutral-200 group-hover:text-white">
+                  {/* Top Overlay: Camera Label and REC Indicator */}
+                  <div className="absolute top-1 inset-x-1.5 flex items-center justify-between font-mono text-[8px] sm:text-[9.5px] text-white tracking-wider pointer-events-none drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]">
+                    <span className="font-bold text-neutral-200 group-hover:text-white truncate max-w-[70%]">
                       {cam.fullName}
                     </span>
-                    <span className="text-[#FF4D5A] font-bold flex items-center gap-1">
+                    <span className="text-[#FF4D5A] font-bold flex items-center gap-1 shrink-0">
                       <span className="w-1.5 h-1.5 rounded-full bg-[#E83B46] inline-block animate-pulse" />
                       <span>REC</span>
                     </span>
                   </div>
 
-                  {/* Bottom Overlay: Timestamp */}
-                  <div className="absolute bottom-1.5 inset-x-1.5 flex items-center justify-between font-mono text-[7px] sm:text-[9px] text-neutral-300 tracking-wider pointer-events-none drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]">
-                    <span>{currentTimeStr || '13 NOV 2026'}</span>
-                    <span className="text-neutral-400 group-hover:text-[#FFCCD5] transition-colors">
+                  {/* Bottom Overlay: Timestamp and [ VIEW ] */}
+                  <div className="absolute bottom-1 inset-x-1.5 flex items-center justify-between font-mono text-[7.5px] sm:text-[9px] text-neutral-300 tracking-wider pointer-events-none drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]">
+                    <span className="truncate">{currentTimeStr || '13 NOV 2026'}</span>
+                    <span className="text-neutral-400 group-hover:text-[#FFCCD5] transition-colors shrink-0">
                       [ VIEW ]
                     </span>
                   </div>
@@ -449,197 +443,202 @@ export function CctvSurveillanceScreen({
             </div>
           </div>
         ) : (
-          /* ================= 2. FULL-SCREEN CAMERA FOOTAGE VIEW ================= */
-          <div className="relative w-full max-w-[177.78vh] aspect-[16/9] max-h-full flex items-center justify-center select-none bg-black rounded-[2px] overflow-hidden border border-[#8F1320]/40 shadow-2xl">
-            {/* The Selected Camera Footage Image - CAM 03 and CAM 04 rendered with clear, normal illumination */}
-            <img
-              src={selectedCamera?.src}
-              alt={selectedCamera?.fullName}
-              className={`w-full h-full object-cover ${
-                selectedCamId === 'cam03' || selectedCamId === 'cam04'
-                  ? 'brightness-110 contrast-100 saturate-105'
-                  : 'filter contrast-125 brightness-95 grayscale'
-              }`}
-            />
-
-            {/* Corner Surveillance Reticles */}
-            <span className="absolute top-3 left-3 w-5 h-5 border-t-2 border-l-2 border-white/70 pointer-events-none" />
-            <span className="absolute top-3 right-3 w-5 h-5 border-t-2 border-r-2 border-white/70 pointer-events-none" />
-            <span className="absolute bottom-3 left-3 w-5 h-5 border-b-2 border-l-2 border-white/70 pointer-events-none" />
-            <span className="absolute bottom-3 right-3 w-5 h-5 border-b-2 border-r-2 border-white/70 pointer-events-none" />
-
-            {/* Camera Overlay Info */}
-            <div className="absolute top-4 left-6 flex items-center gap-3 font-mono text-xs sm:text-sm text-white font-bold tracking-wider drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)] pointer-events-none">
-              <span>{selectedCamera?.fullName}</span>
-              <span className="text-[#FF4D5A] flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-[#E83B46] animate-ping" />
-                <span>REC</span>
-              </span>
-            </div>
-
-            <div className="absolute top-4 right-6 font-mono text-[10px] sm:text-xs text-neutral-300 font-bold tracking-wider drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)] pointer-events-none">
-              {currentTimeStr}
-            </div>
-
-            {/* ================= CAM 03: BEDROOM DIARY HOTSPOT ================= */}
-            {selectedCamId === 'cam03' && (
-              <button
-                type="button"
-                data-testid="interactive-diary-button"
-                onClick={handleOpenDiary}
-                onMouseEnter={() => setHotspotHovered('diary')}
-                onMouseLeave={() => setHotspotHovered(null)}
-                onFocus={() => setHotspotHovered('diary')}
-                onBlur={() => setHotspotHovered(null)}
-                className="absolute z-30 cursor-pointer rounded-[4px] group focus:outline-none transition-all duration-300"
-                style={{
-                  left: '78.5%',
-                  top: '45.5%',
-                  width: '11%',
-                  height: '11.5%',
-                }}
-                aria-label="Interactive Object: Diary resting on the desk - tap to inspect"
-                title="Her Diary - Tap to read"
-              >
-                {/* Soft ambient crimson glow halo under the diary */}
-                <div
-                  className="absolute -inset-2.5 rounded-lg bg-red-600/35 blur-md pointer-events-none animate-[pulse_3s_ease-in-out_infinite]"
-                  aria-hidden="true"
-                />
-
-                {/* Subtle Crimson Glow on Diary */}
-                <div
-                  className={`absolute inset-0 rounded-[2px] transition-all duration-300 pointer-events-none ${
-                    hotspotHovered === 'diary'
-                      ? 'border border-[#FF3B4E] bg-red-950/20 shadow-[0_0_24px_rgba(255,59,78,0.95)] scale-105'
-                      : 'border border-[#FF3B4E]/60 shadow-[0_0_16px_rgba(255,59,78,0.65)] animate-pulse'
-                  }`}
-                />
-
-                {/* Tactical Reticle Brackets */}
-                <span className="absolute -top-1 -left-1 w-2.5 h-2.5 border-t-2 border-l-2 border-[#DE3B4C] pointer-events-none" />
-                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 border-t-2 border-r-2 border-[#DE3B4C] pointer-events-none" />
-                <span className="absolute -bottom-1 -left-1 w-2.5 h-2.5 border-b-2 border-l-2 border-[#DE3B4C] pointer-events-none" />
-                <span className="absolute -bottom-1 -right-1 w-2.5 h-2.5 border-b-2 border-r-2 border-[#DE3B4C] pointer-events-none" />
-
-                {/* Floating Tag */}
-                <div
-                  className={`absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap bg-black/90 border border-[#DE3B4C] text-[#FFCCD5] px-2 py-0.5 rounded-[2px] font-mono text-[8px] sm:text-[10px] tracking-wider uppercase shadow-xl transition-all duration-200 pointer-events-none ${
-                    hotspotHovered === 'diary' ? 'opacity-100 -translate-y-1' : 'opacity-90 sm:opacity-0'
-                  }`}
-                >
-                  <div className="flex items-center gap-1 font-bold">
-                    <span className="text-[#DE3B4C]">▸</span>
-                    <span>DIARY</span>
+          /* ================= 2. INDIVIDUAL CCTV CAMERA VIEW (No overlays blocking image, controls outside) ================= */
+          <div className="w-full max-w-4xl mx-auto flex-1 min-h-0 flex flex-col items-center justify-center py-2 px-1">
+            {/* Camera Footage Frame (Takes Main Focus) */}
+            <div className="relative w-full aspect-[16/9] max-h-[56vh] sm:max-h-[68vh] flex items-center justify-center bg-black rounded-[2px] overflow-hidden border border-[#8F1320]/60 shadow-[0_8px_30px_rgba(0,0,0,0.95)] shrink-0">
+              {/* Over footage: Exactly one clean camera label and one timestamp */}
+              {selectedCamId !== 'cam03' && selectedCamId !== 'cam04' && (
+                <>
+                  <div className="absolute top-2.5 left-3 sm:top-3.5 sm:left-4 font-mono text-[10px] sm:text-xs text-white font-bold tracking-wider drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)] pointer-events-none">
+                    {selectedCamera?.fullName}
                   </div>
-                </div>
-              </button>
-            )}
+                  <div className="absolute top-2.5 right-3 sm:top-3.5 sm:right-4 font-mono text-[9px] sm:text-xs text-neutral-300 font-bold tracking-wider drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)] pointer-events-none">
+                    {currentTimeStr}
+                  </div>
+                </>
+              )}
 
-            {/* ================= CAM 04: LIVING ROOM ENVELOPE HOTSPOT ================= */}
-            {selectedCamId === 'cam04' && (
-              <button
-                type="button"
-                data-testid="interactive-envelope-button"
-                onClick={handleEnvelopeClick}
-                onMouseEnter={() => setHotspotHovered('envelope')}
-                onMouseLeave={() => setHotspotHovered(null)}
-                onFocus={() => setHotspotHovered('envelope')}
-                onBlur={() => setHotspotHovered(null)}
-                className="absolute z-30 cursor-pointer rounded-[4px] group focus:outline-none transition-all duration-300"
-                style={{
-                  left: '45%',
-                  top: '53%',
-                  width: '12.5%',
-                  height: '11.5%',
-                }}
-                aria-label={
-                  unlocked
-                    ? 'Interactive Object: Unlocked Dossier Envelope - tap to open'
-                    : 'Interactive Object: Sealed Antique Envelope with wax seal - tap to unlock'
-                }
-                title={unlocked ? 'Unlocked Envelope - Tap to open' : 'Sealed Envelope - Tap to unlock'}
-              >
-                {/* Soft ambient warm golden/amber glow halo under the envelope */}
-                <div
-                  className={`absolute -inset-2.5 rounded-lg blur-md pointer-events-none animate-[pulse_3s_ease-in-out_infinite] ${
-                    unlocked ? 'bg-emerald-500/35' : 'bg-amber-500/30'
-                  }`}
-                  aria-hidden="true"
-                />
+              {/* The Selected Camera Footage Image */}
+              <img
+                src={selectedCamera?.src}
+                alt={selectedCamera?.fullName}
+                className={`w-full h-full object-cover select-none ${
+                  selectedCamId === 'cam03' || selectedCamId === 'cam04'
+                    ? 'brightness-110 contrast-100 saturate-105'
+                    : 'filter contrast-125 brightness-95 grayscale'
+                }`}
+              />
 
-                {/* Subtle Highlight Outline */}
-                <div
-                  className={`absolute inset-0 rounded-[2px] transition-all duration-300 pointer-events-none ${
-                    hotspotHovered === 'envelope'
-                      ? unlocked
-                        ? 'border border-emerald-400 bg-emerald-950/20 shadow-[0_0_24px_rgba(52,211,153,0.95)] scale-105'
-                        : 'border border-[#FF3B4E] bg-red-950/20 shadow-[0_0_24px_rgba(255,59,78,0.95)] scale-105'
-                      : unlocked
-                      ? 'border border-emerald-400/70 shadow-[0_0_16px_rgba(52,211,153,0.6)] animate-pulse'
-                      : 'border border-[#FF3B4E]/60 shadow-[0_0_16px_rgba(255,59,78,0.6)] animate-pulse'
-                  }`}
-                />
+              {/* Corner Surveillance Reticles */}
+              <span className="absolute top-2.5 left-2.5 w-4 h-4 border-t-2 border-l-2 border-white/70 pointer-events-none" />
+              <span className="absolute top-2.5 right-2.5 w-4 h-4 border-t-2 border-r-2 border-white/70 pointer-events-none" />
+              <span className="absolute bottom-2.5 left-2.5 w-4 h-4 border-b-2 border-l-2 border-white/70 pointer-events-none" />
+              <span className="absolute bottom-2.5 right-2.5 w-4 h-4 border-b-2 border-r-2 border-white/70 pointer-events-none" />
 
-                {/* Tactical Reticle Brackets */}
-                <span
-                  className={`absolute -top-1 -left-1 w-2.5 h-2.5 border-t-2 border-l-2 pointer-events-none ${
-                    unlocked ? 'border-emerald-400' : 'border-[#DE3B4C]'
-                  }`}
-                />
-                <span
-                  className={`absolute -top-1 -right-1 w-2.5 h-2.5 border-t-2 border-r-2 pointer-events-none ${
-                    unlocked ? 'border-emerald-400' : 'border-[#DE3B4C]'
-                  }`}
-                />
-                <span
-                  className={`absolute -bottom-1 -left-1 w-2.5 h-2.5 border-b-2 border-l-2 pointer-events-none ${
-                    unlocked ? 'border-emerald-400' : 'border-[#DE3B4C]'
-                  }`}
-                />
-                <span
-                  className={`absolute -bottom-1 -right-1 w-2.5 h-2.5 border-b-2 border-r-2 pointer-events-none ${
-                    unlocked ? 'border-emerald-400' : 'border-[#DE3B4C]'
-                  }`}
-                />
+              {/* ================= CAM 03: BEDROOM DIARY HOTSPOT ================= */}
+              {selectedCamId === 'cam03' && (
+                <button
+                  type="button"
+                  data-testid="interactive-diary-button"
+                  onClick={handleOpenDiary}
+                  onMouseEnter={() => setHotspotHovered('diary')}
+                  onMouseLeave={() => setHotspotHovered(null)}
+                  onFocus={() => setHotspotHovered('diary')}
+                  onBlur={() => setHotspotHovered(null)}
+                  className="absolute z-30 cursor-pointer rounded-[4px] group focus:outline-none transition-all duration-300"
+                  style={{
+                    left: '78.5%',
+                    top: '45.5%',
+                    width: '11%',
+                    height: '11.5%',
+                  }}
+                  aria-label="Interactive Object: Diary resting on the desk - tap to inspect"
+                  title="Her Diary - Tap to read"
+                >
+                  {/* Soft ambient crimson glow halo under the diary */}
+                  <div
+                    className="absolute -inset-2.5 rounded-lg bg-red-600/35 blur-md pointer-events-none animate-[pulse_3s_ease-in-out_infinite]"
+                    aria-hidden="true"
+                  />
 
-                {/* Floating Tag */}
-                <div
-                  className={`absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap bg-black/90 border px-2 py-0.5 rounded-[2px] font-mono text-[8px] sm:text-[10px] tracking-wider uppercase shadow-xl transition-all duration-200 pointer-events-none ${
+                  {/* Subtle Crimson Glow on Diary */}
+                  <div
+                    className={`absolute inset-0 rounded-[2px] transition-all duration-300 pointer-events-none ${
+                      hotspotHovered === 'diary'
+                        ? 'border border-[#FF3B4E] bg-red-950/20 shadow-[0_0_24px_rgba(255,59,78,0.95)] scale-105'
+                        : 'border border-[#FF3B4E]/60 shadow-[0_0_16px_rgba(255,59,78,0.65)] animate-pulse'
+                    }`}
+                  />
+
+                  {/* Tactical Reticle Brackets */}
+                  <span className="absolute -top-1 -left-1 w-2.5 h-2.5 border-t-2 border-l-2 border-[#DE3B4C] pointer-events-none" />
+                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 border-t-2 border-r-2 border-[#DE3B4C] pointer-events-none" />
+                  <span className="absolute -bottom-1 -left-1 w-2.5 h-2.5 border-b-2 border-l-2 border-[#DE3B4C] pointer-events-none" />
+                  <span className="absolute -bottom-1 -right-1 w-2.5 h-2.5 border-b-2 border-r-2 border-[#DE3B4C] pointer-events-none" />
+
+                  {/* Floating Tag */}
+                  <div
+                    className={`absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap bg-black/90 border border-[#DE3B4C] text-[#FFCCD5] px-2 py-0.5 rounded-[2px] font-mono text-[8px] sm:text-[10px] tracking-wider uppercase shadow-xl transition-all duration-200 pointer-events-none ${
+                      hotspotHovered === 'diary' ? 'opacity-100 -translate-y-1' : 'opacity-90 sm:opacity-0'
+                    }`}
+                  >
+                    <div className="flex items-center gap-1 font-bold">
+                      <span className="text-[#DE3B4C]">▸</span>
+                      <span>DIARY</span>
+                    </div>
+                  </div>
+                </button>
+              )}
+
+              {/* ================= CAM 04: LIVING ROOM ENVELOPE HOTSPOT ================= */}
+              {selectedCamId === 'cam04' && (
+                <button
+                  type="button"
+                  data-testid="interactive-envelope-button"
+                  onClick={handleEnvelopeClick}
+                  onMouseEnter={() => setHotspotHovered('envelope')}
+                  onMouseLeave={() => setHotspotHovered(null)}
+                  onFocus={() => setHotspotHovered('envelope')}
+                  onBlur={() => setHotspotHovered(null)}
+                  className="absolute z-30 cursor-pointer rounded-[4px] group focus:outline-none transition-all duration-300"
+                  style={{
+                    left: '45%',
+                    top: '53%',
+                    width: '12.5%',
+                    height: '11.5%',
+                  }}
+                  aria-label={
                     unlocked
-                      ? 'border-emerald-400 text-emerald-200'
-                      : 'border-[#DE3B4C] text-[#FFCCD5]'
-                  } ${
-                    hotspotHovered === 'envelope'
-                      ? 'opacity-100 -translate-y-1'
-                      : 'opacity-90 sm:opacity-0'
-                  }`}
+                      ? 'Interactive Object: Unlocked Dossier Envelope - tap to open'
+                      : 'Interactive Object: Sealed Antique Envelope with wax seal - tap to unlock'
+                  }
+                  title={unlocked ? 'Unlocked Envelope - Tap to open' : 'Sealed Envelope - Tap to unlock'}
                 >
-                  <div className="flex items-center gap-1 font-bold">
-                    <span>{unlocked ? '🔓' : '🔒'}</span>
-                    <span>{unlocked ? 'OPEN ENVELOPE' : 'SEALED ENVELOPE'}</span>
-                  </div>
-                </div>
-              </button>
-            )}
+                  {/* Soft ambient warm golden/amber glow halo under the envelope */}
+                  <div
+                    className={`absolute -inset-2.5 rounded-lg blur-md pointer-events-none animate-[pulse_3s_ease-in-out_infinite] ${
+                      unlocked ? 'bg-emerald-500/35' : 'bg-amber-500/30'
+                    }`}
+                    aria-hidden="true"
+                  />
 
-            {/* Quick Camera Switcher Bar at Bottom of Full-Screen View */}
-            <div className="absolute bottom-3 inset-x-4 flex items-center justify-between pointer-events-auto">
+                  {/* Subtle Highlight Outline */}
+                  <div
+                    className={`absolute inset-0 rounded-[2px] transition-all duration-300 pointer-events-none ${
+                      hotspotHovered === 'envelope'
+                        ? unlocked
+                          ? 'border border-emerald-400 bg-emerald-950/20 shadow-[0_0_24px_rgba(52,211,153,0.95)] scale-105'
+                          : 'border border-[#FF3B4E] bg-red-950/20 shadow-[0_0_24px_rgba(255,59,78,0.95)] scale-105'
+                        : unlocked
+                        ? 'border border-emerald-400/70 shadow-[0_0_16px_rgba(52,211,153,0.6)] animate-pulse'
+                        : 'border border-[#FF3B4E]/60 shadow-[0_0_16px_rgba(255,59,78,0.6)] animate-pulse'
+                    }`}
+                  />
+
+                  {/* Tactical Reticle Brackets */}
+                  <span
+                    className={`absolute -top-1 -left-1 w-2.5 h-2.5 border-t-2 border-l-2 pointer-events-none ${
+                      unlocked ? 'border-emerald-400' : 'border-[#DE3B4C]'
+                    }`}
+                  />
+                  <span
+                    className={`absolute -top-1 -right-1 w-2.5 h-2.5 border-t-2 border-r-2 pointer-events-none ${
+                      unlocked ? 'border-emerald-400' : 'border-[#DE3B4C]'
+                    }`}
+                  />
+                  <span
+                    className={`absolute -bottom-1 -left-1 w-2.5 h-2.5 border-b-2 border-l-2 pointer-events-none ${
+                      unlocked ? 'border-emerald-400' : 'border-[#DE3B4C]'
+                    }`}
+                  />
+                  <span
+                    className={`absolute -bottom-1 -right-1 w-2.5 h-2.5 border-b-2 border-r-2 pointer-events-none ${
+                      unlocked ? 'border-emerald-400' : 'border-[#DE3B4C]'
+                    }`}
+                  />
+
+                  {/* Floating Tag */}
+                  <div
+                    className={`absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap bg-black/90 border px-2 py-0.5 rounded-[2px] font-mono text-[8px] sm:text-[10px] tracking-wider uppercase shadow-xl transition-all duration-200 pointer-events-none ${
+                      unlocked
+                        ? 'border-emerald-400 text-emerald-200'
+                        : 'border-[#DE3B4C] text-[#FFCCD5]'
+                    } ${
+                      hotspotHovered === 'envelope'
+                        ? 'opacity-100 -translate-y-1'
+                        : 'opacity-90 sm:opacity-0'
+                    }`}
+                  >
+                    <div className="flex items-center gap-1 font-bold">
+                      <span>{unlocked ? '🔓' : '🔒'}</span>
+                      <span>{unlocked ? 'OPEN ENVELOPE' : 'SEALED ENVELOPE'}</span>
+                    </div>
+                  </div>
+                </button>
+              )}
+            </div>
+
+            {/* Camera Navigation in a Separate, Compact Area OUTSIDE and BELOW the Footage */}
+            <div className="w-full shrink-0 mt-2 sm:mt-3 px-1 flex items-center justify-between gap-1.5 sm:gap-2 z-30">
               <button
                 type="button"
                 onClick={() => setSelectedCamId(null)}
-                className="px-2.5 py-1 bg-black/80 hover:bg-[#8F1320] text-neutral-200 hover:text-white border border-[#8F1320]/60 rounded-[2px] font-mono text-[9px] sm:text-[11px] font-bold tracking-wider uppercase transition-colors cursor-pointer"
+                className="px-2 sm:px-2.5 py-1 bg-black/85 hover:bg-[#8F1320] text-neutral-200 hover:text-white border border-[#8F1320]/60 rounded-[2px] font-mono text-[9px] sm:text-[11px] font-bold tracking-wider uppercase transition-colors cursor-pointer shrink-0"
               >
                 ← GRID VIEW
               </button>
 
-              <div className="flex items-center gap-1 bg-black/75 p-0.5 rounded-[2px] border border-[#8F1320]/30 overflow-x-auto max-w-[70%]">
+              <div className="flex items-center gap-1 bg-black/85 p-0.5 sm:p-1 rounded-[2px] border border-[#8F1320]/40 overflow-x-auto max-w-[75%]">
                 {CAMERAS.map((cam) => (
                   <button
                     key={cam.id}
                     type="button"
-                    onClick={() => setSelectedCamId(cam.id)}
-                    className={`px-1.5 py-0.5 font-mono text-[8px] sm:text-[10px] rounded-[1px] transition-colors cursor-pointer whitespace-nowrap ${
+                    onClick={() => {
+                      handleUserInteractionSound();
+                      setSelectedCamId(cam.id);
+                    }}
+                    className={`px-1.5 sm:px-2 py-0.5 font-mono text-[8.5px] sm:text-[10px] rounded-[1px] transition-colors cursor-pointer whitespace-nowrap ${
                       cam.id === selectedCamId
                         ? 'bg-[#8F1320] text-white font-bold'
                         : 'text-neutral-400 hover:text-neutral-200'
@@ -654,11 +653,11 @@ export function CctvSurveillanceScreen({
         )}
       </main>
 
-      {/* ================= FOOTER ================= */}
-      <footer className="relative z-30 px-3 py-1.5 sm:px-4 sm:py-2 bg-black/90 border-t border-[#8F1320]/40 flex items-center justify-between font-mono text-[9px] sm:text-[10px] text-neutral-400">
-        <div className="flex items-center gap-2">
-          <span className="text-[#DE3B4C] font-bold">STATUS:</span>
-          <span>
+      {/* ================= COMPACT FOOTER ================= */}
+      <footer className="relative z-30 px-2.5 py-1 sm:px-4 sm:py-1.5 bg-black/90 border-t border-[#8F1320]/40 flex items-center justify-between font-mono text-[8.5px] sm:text-[10px] text-neutral-400 shrink-0">
+        <div className="flex items-center gap-1.5 truncate">
+          <span className="text-[#DE3B4C] font-bold shrink-0">STATUS:</span>
+          <span className="truncate">
             {selectedCamId === null
               ? 'Select any camera feed to investigate.'
               : selectedCamId === 'cam03'
@@ -671,10 +670,10 @@ export function CctvSurveillanceScreen({
           </span>
         </div>
 
-        <div className="flex items-center gap-3">
-          <span className="text-neutral-500 hidden sm:inline">SIGNAL: 99.8% STABLE</span>
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="text-neutral-500 hidden sm:inline">SIGNAL: 99.8%</span>
           {selectedCamId === null && (
-            <span className="text-[#FF4D5A] font-bold">6 FEEDS DETECTED</span>
+            <span className="text-[#FF4D5A] font-bold">6 FEEDS</span>
           )}
         </div>
       </footer>
@@ -701,12 +700,14 @@ export function CctvSurveillanceScreen({
         }}
       />
 
-      {/* Detective Laren Persistent Interactive Guide */}
-      <DetectiveLaren
-        dialogueText={getLarenDialogue()}
-        isIntroModalOpen={isLarenIntroOpen}
-        onDismissIntro={handleDismissLarenIntro}
-      />
+      {/* Detective Laren Persistent Interactive Guide (Hidden when PasswordUnlockModal has its own anchored Laren) */}
+      {!isPasswordModalOpen && (
+        <DetectiveLaren
+          dialogueText={getLarenDialogue()}
+          isIntroModalOpen={isLarenIntroOpen}
+          onDismissIntro={handleDismissLarenIntro}
+        />
+      )}
     </section>
   );
 }
