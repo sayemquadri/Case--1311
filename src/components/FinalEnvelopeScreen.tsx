@@ -240,47 +240,7 @@ export function FinalEnvelopeScreen({
               data-testid="unfolded-letter-card"
               className="relative w-full rounded-2xl p-5 sm:p-8 md:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.08)] border bg-[#FFFDF9]/95 border-[#FFCCD5] text-[#2C221E] backdrop-blur-md"
             >
-              {/* Decorative Stickers (Non-interactive) */}
-              <div className="absolute -top-3 left-6 px-3 py-1 bg-[#FFD166] text-[#6A4C00] font-sans text-xs font-bold rounded shadow transform -rotate-3 select-none pointer-events-none">
-                🍒 Cherry & Sunshine
-              </div>
-              <div className="absolute -top-3 right-6 px-3 py-1 bg-[#FF6B6B] text-white font-sans text-xs font-bold rounded shadow transform rotate-3 select-none pointer-events-none">
-                🌈 Rainbow & Joy
-              </div>
-
-              {/* Elegant Heading */}
-              <div className="border-b pb-3 mb-6 flex items-center justify-center border-[#FFCCD5]">
-                <h2
-                  className="font-serif text-base sm:text-xl md:text-2xl font-bold tracking-widest text-[#4A0A10] text-center"
-                  style={{ fontFamily: "'Cinzel', 'Lora', serif" }}
-                >
-                  A LITTLE SOMETHING FOR YOU
-                </h2>
-              </div>
-
-              {/* SECTION 1: LAST REPORTED STATEMENT */}
-              <section
-                data-testid="statement-section"
-                className="p-5 sm:p-7 rounded-xl mb-6 border bg-[#FFF9FA]/90 border-[#FFD6DC] shadow-xs"
-              >
-                <div className="pb-2.5 mb-3.5 border-b border-[#E63946]/20">
-                  <h3
-                    className="font-serif text-xs sm:text-sm font-bold uppercase tracking-[0.2em] text-[#E63946]"
-                    style={{ fontFamily: "'Cinzel', 'Lora', serif" }}
-                  >
-                    LAST REPORTED STATEMENT
-                  </h3>
-                </div>
-
-                <div
-                  className="font-serif text-sm sm:text-base leading-relaxed text-[#2C221E] min-h-[90px] whitespace-pre-line"
-                  style={{ fontFamily: "'Lora', 'Georgia', serif" }}
-                >
-                  {/* Clean, dedicated space ready for the actual statement */}
-                </div>
-              </section>
-
-              {/* SECTION 2: PERSONAL BIRTHDAY LETTER */}
+              {/* SECTION: PERSONAL BIRTHDAY LETTER */}
               <section
                 data-testid="letter-section"
                 className="p-5 sm:p-8 rounded-xl border bg-[#FFFDF8]/95 border-[#FFE5B4] shadow-xs"
