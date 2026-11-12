@@ -4,74 +4,84 @@
  */
 
 import React from 'react';
-import { ClassifiedStamp } from './TactileDecorations';
+import { EXPERIENCE_CONTENT } from '../data/storyContent';
 
 interface TriggerWarningScreenProps {
   onEnterAnyways: () => void;
 }
 
-const ADVISORY_ITEMS = [
-  'Homicide (1 victim, unidentified)',
-  'Missing evidence',
-  'Psychological suspense',
-  'Unreliable narrator',
-  'One suspect who knows you well',
-];
-
 export function TriggerWarningScreen({ onEnterAnyways }: TriggerWarningScreenProps) {
+  const { warning } = EXPERIENCE_CONTENT;
+
   return (
     <section
-      className="w-full h-[100dvh] bg-[#000000] text-[#241A15] flex items-center justify-center p-3 sm:p-4 overflow-hidden select-none"
-      aria-label="Content Advisory"
+      className="relative w-full min-h-[100dvh] bg-[#0A0705] text-[#241A15] flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-y-auto select-none"
+      aria-label="Content Warning Poster"
     >
-      <div className="relative max-w-sm sm:max-w-md w-full bg-[#EBE2D3] border border-[#B8A68B] shadow-[0_20px_50px_rgba(0,0,0,0.92),0_0_1px_rgba(143,19,32,0.4)] rounded-[2px] p-4 sm:p-6 flex flex-col justify-between">
-        {/* 1. Small red label & 2. Title */}
-        <header className="border-b border-[#B8A68B]/70 pb-3 mb-3">
-          <div className="font-mono text-[10px] sm:text-[11px] font-bold tracking-[0.24em] text-[#8F1320] uppercase">
-            CONTENT ADVISORY
-          </div>
-          <h1
-            data-testid="warning-heading"
-            className="font-serif text-xl sm:text-2xl font-bold tracking-tight text-[#1E1513] mt-1"
-            style={{ fontFamily: "'Cinzel', 'Lora', serif" }}
-          >
-            READER ADVISORY
-          </h1>
-        </header>
+      {/* Dark Ambient Vignette and Atmospheric Texture */}
+      <div
+        className="fixed inset-0 pointer-events-none z-0 opacity-80"
+        style={{
+          background:
+            'radial-gradient(circle at 50% 45%, rgba(35,22,15,0.4) 0%, rgba(10,7,5,0.95) 75%, #050302 100%)',
+        }}
+      />
 
-        {/* 3. The existing stamp: CASE 1311 // RESTRICTED */}
-        <div className="mb-3.5 self-start">
-          <ClassifiedStamp text="CASE 1311 // RESTRICTED" className="-rotate-1" />
-        </div>
+      {/* Accessible Screen-Reader & Semantic Document Content */}
+      <div className="sr-only">
+        <h1>{warning.heading}</h1>
+        <h2>{warning.subheading}</h2>
+        <p>This little story contains:</p>
+        <ol>
+          {warning.disclosures.map((item, index) => (
+            <li key={index}>{item}</li>
+          ))}
+        </ol>
+      </div>
 
-        {/* 4. A short list of 5 items, each on a single line, numbered 1 to 5 in existing small boxes */}
+      {/* The Physical Parchment Poster (1:1.29 Aspect Ratio matching 1103x1426) */}
+      <div className="relative z-10 w-full max-w-[min(450px,92vw)] max-h-[88dvh] aspect-[1103/1426] my-auto flex items-center justify-center filter drop-shadow-[0_25px_60px_rgba(0,0,0,0.98)]">
+        {/* Visual Asset: trigge warning.png with WebP optimization */}
+        <picture className="w-full h-full block">
+          <source srcSet="/assets/aistudio/trigge_warning.webp" type="image/webp" />
+          <img
+            src="/trigge warning.png"
+            alt="Vintage Thriller Content Warning Poster — Case 1311 evidence document with antique journal, brass key, and train ticket"
+            className="w-full h-full object-contain pointer-events-none select-none rounded-[2px]"
+            loading="eager"
+            decoding="async"
+          />
+        </picture>
+
+        {/* ================= INTERACTION: ENTER ANYWAYS BUTTON ================= */}
+        {/* Integrated naturally into the bottom torn edge / tape area of the parchment */}
         <div
-          data-testid="warning-content-area"
-          className="bg-[#F5EFE4] border border-[#C5B49C] p-3 sm:p-3.5 rounded-[2px] shadow-inner mb-4"
+          className="absolute z-20 flex justify-center items-center pointer-events-auto"
+          style={{
+            bottom: '5.2%',
+            left: '8%',
+            right: '8%',
+          }}
         >
-          <ul className="space-y-2 sm:space-y-2.5">
-            {ADVISORY_ITEMS.map((item, index) => (
-              <li key={index} className="flex items-center gap-2.5 text-[#2B1F1C]">
-                <span className="font-mono text-[11px] font-bold text-[#8F1320] bg-[#8F1320]/10 border border-[#8F1320]/30 w-5 h-5 flex items-center justify-center shrink-0 rounded-[1px]">
-                  {index + 1}
-                </span>
-                <span className="font-serif text-[12.5px] sm:text-[13.5px] whitespace-nowrap tracking-tight leading-none">
-                  {item}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
+          <button
+            type="button"
+            data-testid="enter-anyways-button"
+            onClick={onEnterAnyways}
+            className="group relative px-6 sm:px-9 py-2.5 sm:py-3.5 bg-[#8B141A] hover:bg-[#A31820] active:bg-[#680E13] border-2 border-[#5A0D11] rounded-[2px] shadow-[0_6px_20px_rgba(0,0,0,0.85),inset_0_1px_2px_rgba(255,255,255,0.25)] text-[#FAF3E6] font-mono text-xs sm:text-sm font-bold tracking-[0.22em] uppercase transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-[#8B141A] focus:ring-offset-2 focus:ring-offset-black"
+          >
+            {/* Subtle stamped ink texture */}
+            <span className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] flex items-center gap-2">
+              <span>ENTER ANYWAYS</span>
+              <span className="transform group-hover:translate-x-1 transition-transform">→</span>
+            </span>
 
-        {/* 5. Full-width button: CHECK THE FOOTAGE → (min height 52px, tap area covers whole button) */}
-        <button
-          type="button"
-          data-testid="enter-anyways-button"
-          onClick={onEnterAnyways}
-          className="w-full min-h-[52px] px-6 py-3.5 bg-[#8F1320] hover:bg-[#A31525] active:bg-[#6E0E18] text-[#F5EFE4] font-mono text-xs sm:text-sm font-bold tracking-[0.22em] uppercase rounded-[2px] shadow-[0_4px_14px_rgba(143,19,32,0.4)] cursor-pointer flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F1320] focus-visible:ring-offset-2 select-none"
-        >
-          <span>CHECK THE FOOTAGE →</span>
-        </button>
+            {/* Corner archival notches */}
+            <span className="absolute -top-1 -left-1 w-2 h-2 border-t border-l border-[#FFA8B0]/60 pointer-events-none" />
+            <span className="absolute -top-1 -right-1 w-2 h-2 border-t border-r border-[#FFA8B0]/60 pointer-events-none" />
+            <span className="absolute -bottom-1 -left-1 w-2 h-2 border-b border-l border-[#FFA8B0]/60 pointer-events-none" />
+            <span className="absolute -bottom-1 -right-1 w-2 h-2 border-b border-r border-[#FFA8B0]/60 pointer-events-none" />
+          </button>
+        </div>
       </div>
     </section>
   );

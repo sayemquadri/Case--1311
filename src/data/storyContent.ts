@@ -59,18 +59,18 @@ export interface ExperienceContent {
 
 export const EXPERIENCE_CONTENT: ExperienceContent = {
   warning: {
-    heading: 'READER ADVISORY',
+    heading: 'CONTENT WARNING',
     stampText: 'CASE 1311 // RESTRICTED',
-    subheading: 'CONTENT ADVISORY',
+    subheading: 'Before you turn the first page...',
     disclosures: [
-      'Homicide (1 victim, unidentified)',
-      'Missing evidence',
-      'Psychological suspense',
-      'Unreliable narrator',
-      'One suspect who knows you well',
+      'Dark themes and fictional murder-mystery elements.',
+      'Blood, stains and disturbing imagery.',
+      'References to obsession and dangerously devoted admiration.',
+      'Psychological tension and suspicious diary entries.',
+      'Questionable levels of affection and an unreasonable amount of drama.',
     ],
     authorNote: [],
-    buttonText: 'CHECK THE FOOTAGE →',
+    buttonText: 'ENTER ANYWAYS',
   },
   story: {
     seriesTitle: 'THE GIRL IN THE BEAUTIFUL CAGE',

@@ -149,8 +149,8 @@ test('envelope opens and reveals contents', () => {
 });
 
 test('content schema contains all required placeholders', () => {
-  assert.equal(EXPERIENCE_CONTENT.warning.heading, 'READER ADVISORY');
-  assert.equal(EXPERIENCE_CONTENT.warning.buttonText, 'CHECK THE FOOTAGE →');
+  assert.equal(EXPERIENCE_CONTENT.warning.heading, 'CONTENT WARNING');
+  assert.equal(EXPERIENCE_CONTENT.warning.buttonText, 'ENTER ANYWAYS');
   assert.equal(EXPERIENCE_CONTENT.story.chapterTitle, 'HER STORY');
   assert.ok(EXPERIENCE_CONTENT.story.pages.length >= 3);
   assert.ok(DIARY_SPREADS.length === 4);
@@ -169,4 +169,18 @@ test('every diary spread starts with "hii, I\'m" and hides the name', () => {
   const lastSpread = DIARY_SPREADS[DIARY_SPREADS.length - 1];
   assert.equal(lastSpread.rightPage.isFinalSpread, true);
   assert.equal(lastSpread.rightPage.hiddenPasswordClue?.code, '1311');
+});
+
+test('detective laren dialogue constants match exact user specifications', () => {
+  const intro = "hii, I'm detective laren, nice to meet you";
+  const controlRoom = "You can check all the cameras if u tap on it";
+  const bedroom = "finally we found the diary! Interesting, we should read it, tap into it!";
+  const livingRoom = "Ohh an envelope? You should check it out by tapping on it";
+  const lockedEnvelope = "Ohh we require a password! It should be on the diary! We should find it";
+
+  assert.equal(intro, "hii, I'm detective laren, nice to meet you");
+  assert.equal(controlRoom, "You can check all the cameras if u tap on it");
+  assert.equal(bedroom, "finally we found the diary! Interesting, we should read it, tap into it!");
+  assert.equal(livingRoom, "Ohh an envelope? You should check it out by tapping on it");
+  assert.equal(lockedEnvelope, "Ohh we require a password! It should be on the diary! We should find it");
 });
