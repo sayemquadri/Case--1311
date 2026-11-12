@@ -17,7 +17,7 @@ interface InteractiveDiaryModalProps {
 }
 
 /**
- * Realistic physical torn paper patch with fibrous frayed edges and dried crimson blood smears.
+ * Realistic physical torn paper patch with fibrous frayed edges and dried crimson stains.
  * Visually conceals the name without displaying any placeholder text.
  */
 function TornPaperNameCover() {
@@ -64,32 +64,31 @@ function TornPaperNameCover() {
           }}
         />
 
-        {/* Realistic dried blood smear & irregular stain droplets */}
+        {/* Realistic dried crimson smear & irregular stain droplets */}
         <svg
           viewBox="0 0 100 24"
           className="absolute inset-0 w-full h-full pointer-events-none opacity-90"
           preserveAspectRatio="none"
         >
-          {/* Base blood pool smear */}
+          {/* Base crimson smear */}
           <path
             d="M 6 12 Q 22 7 40 12 Q 58 15 74 9 Q 89 6 94 13 Q 86 21 66 18 Q 46 22 26 18 Q 12 21 6 12 Z"
             fill="#5E0B14"
             opacity="0.85"
           />
-          {/* Darker clotted oxidized center */}
+          {/* Darker clotted center */}
           <path
             d="M 16 11 Q 32 8 48 12 Q 62 14 78 10 Q 70 17 52 15 Q 34 18 16 11 Z"
             fill="#3B050B"
             opacity="0.9"
           />
-          {/* Subtle blood splatter droplets and smears */}
+          {/* Splatter droplets */}
           <circle cx="12" cy="7" r="1.5" fill="#6E0D18" opacity="0.75" />
           <circle cx="84" cy="16" r="1.2" fill="#5E0B14" opacity="0.7" />
           <circle cx="44" cy="5" r="1.1" fill="#7E101D" opacity="0.65" />
           <path d="M 62 14 Q 65 20 63 23" stroke="#5E0B14" strokeWidth="1" strokeLinecap="round" opacity="0.65" />
         </svg>
 
-        {/* Faint pen tear line across the excised paper */}
         <span className="absolute inset-y-1.5 inset-x-2 border-b border-[#3B050B]/35 opacity-70" />
       </span>
     </span>
@@ -97,8 +96,40 @@ function TornPaperNameCover() {
 }
 
 /**
+ * Hand-drawn crimson circle for calendar 13 November.
+ */
+function CrimsonCircleHighlight() {
+  return (
+    <svg
+      viewBox="0 0 44 44"
+      className="absolute -inset-1.5 w-[calc(100%+12px)] h-[calc(100%+12px)] pointer-events-none text-[#A31525]"
+      fill="none"
+    >
+      <ellipse
+        cx="22"
+        cy="22"
+        rx="18"
+        ry="17"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeDasharray="95 8"
+        transform="rotate(-8 22 22)"
+        opacity="0.9"
+      />
+      <path
+        d="M 6 22 C 8 8, 36 6, 38 20 C 40 34, 12 38, 7 24"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        opacity="0.7"
+      />
+    </svg>
+  );
+}
+
+/**
  * Subtle CSS/SVG noise-based fibrous paper texture overlay.
- * Infuses organic pulp grain and delicate laid-paper chain lines into the antique cream pages.
  */
 function PaperFiberNoiseOverlay() {
   return (
@@ -153,7 +184,7 @@ export function InteractiveDiaryModal({
   const currentSpreadIndex = Math.min(totalSpreads - 1, Math.floor(pageIndex / 2));
   const currentSpread: DiarySpread = DIARY_SPREADS[currentSpreadIndex];
 
-  // Mobile navigation boundaries
+  // Boundaries
   const isFirst = isMobile ? pageIndex === 0 : currentSpreadIndex === 0;
   const isLast = isMobile ? pageIndex === totalPages - 1 : currentSpreadIndex === totalSpreads - 1;
 
@@ -204,7 +235,6 @@ export function InteractiveDiaryModal({
     touchStartX.current = null;
     touchStartY.current = null;
 
-    // Detect horizontal swipe if delta is significant and horizontal
     if (Math.abs(deltaX) > 40 && Math.abs(deltaX) > Math.abs(deltaY) * 1.4) {
       if (deltaX < 0) {
         handleNext();
@@ -221,13 +251,12 @@ export function InteractiveDiaryModal({
     if (e.key === 'Escape') onClose();
   };
 
-  // Whether mobile view is currently displaying the Left Page (even index) or Right Page (odd index)
   const isLeftPageOnMobile = pageIndex % 2 === 0;
 
-  // Render Left Page Content (Personal handwritten entry)
+  // Render Left Page Content (Pages 1, 3, 5, 7 — New Entry)
   const renderLeftPage = (spread: DiarySpread, isMobileView: boolean) => (
     <div
-      className={`relative p-3.5 xs:p-4.5 sm:p-7 flex flex-col justify-between h-full bg-[#FAF4E5] select-text overflow-hidden ${
+      className={`relative p-3.5 xs:p-4.5 sm:p-7 flex flex-col justify-between h-full bg-[#FAF4E5] select-text overflow-y-auto ${
         isMobileView ? 'rounded' : 'md:border-r border-[#C7B594]/60'
       }`}
       style={{
@@ -238,20 +267,17 @@ export function InteractiveDiaryModal({
         backgroundSize: 'cover',
       }}
     >
-      {/* Subtle noise-based fibrous paper texture overlay */}
       <PaperFiberNoiseOverlay />
 
-      {/* Decorative center spine shadow gradient for desktop curvature */}
+      {/* Decorative center spine shadow */}
       {!isMobileView && (
         <div className="hidden md:block absolute top-0 bottom-0 right-0 w-10 bg-gradient-to-l from-black/25 via-black/10 to-transparent pointer-events-none z-10" />
       )}
-
-      {/* Curvature inner shadow for physical realism */}
       <div className="absolute inset-0 pointer-events-none shadow-[inset_0_2px_10px_rgba(0,0,0,0.06)] z-10" />
 
-      {/* Main Narrative Block */}
+      {/* Narrative Entry Block */}
       <div className="relative z-20 space-y-2 xs:space-y-2.5">
-        {/* Entry Date & Title (Natural journal elements only) */}
+        {/* Entry Date & Title */}
         <div className="border-b border-[#8F1320]/25 pb-1.5 xs:pb-2">
           <div className="font-serif text-[10.5px] xs:text-[11.5px] sm:text-xs font-semibold text-[#8F1320] tracking-wider uppercase">
             {spread.entryDate}
@@ -260,11 +286,11 @@ export function InteractiveDiaryModal({
             className="font-serif text-sm xs:text-base sm:text-lg font-bold tracking-tight text-[#1E1513] mt-0.5 leading-snug"
             style={{ fontFamily: "'Cinzel', 'Lora', serif" }}
           >
-            {spread.entryTitle}
+            {spread.leftPage.title}
           </h2>
         </div>
 
-        {/* Greeting with Physical Torn-Name Effect */}
+        {/* Entry Begins: hii, I'm [torn name cover], */}
         <div className="pt-0.5">
           <div className="inline-flex items-center flex-wrap font-serif text-xs xs:text-[13.5px] sm:text-base font-bold text-[#1F1513]">
             <span className="italic mr-0.5">{spread.leftPage.greetingPrefix}</span>
@@ -274,24 +300,29 @@ export function InteractiveDiaryModal({
         </div>
 
         {/* Narrative Paragraphs */}
-        <div className="space-y-1.5 xs:space-y-2 sm:space-y-2.5 font-serif text-[11px] xs:text-[12px] sm:text-[13.5px] leading-[1.48] xs:leading-[1.52] sm:leading-relaxed text-[#2B1F1C]">
+        <div className="space-y-1.5 xs:space-y-2 sm:space-y-2.5 font-serif text-[11px] xs:text-[12px] sm:text-[13px] leading-[1.48] xs:leading-[1.52] sm:leading-relaxed text-[#2B1F1C]">
           {spread.leftPage.text.map((paragraph, idx) => (
             <p key={idx}>{paragraph}</p>
           ))}
         </div>
       </div>
 
-      {/* Bottom Signoff in Cursive Handwriting */}
-      <div className="relative z-20 pt-2 sm:pt-3 border-t border-[#B5A17D]/40 font-handwriting text-xs xs:text-sm sm:text-base text-[#6B5342] italic mt-auto">
-        {spread.leftPage.handwrittenSignoff}
-      </div>
+      {/* Handwritten Signoff */}
+      {spread.leftPage.handwrittenSignoff && (
+        <div
+          className="relative z-20 pt-2 sm:pt-3 border-t border-[#B5A17D]/40 text-xs xs:text-sm sm:text-base text-[#6B5342] italic mt-auto"
+          style={{ fontFamily: "'Caveat', cursive" }}
+        >
+          {spread.leftPage.handwrittenSignoff}
+        </div>
+      )}
     </div>
   );
 
-  // Render Right Page Content (Clean antique journal page, with cipher key on final entry)
+  // Render Right Page Content (Pages 2, 4, 6, 8 — Continuation Pages)
   const renderRightPage = (spread: DiarySpread, isMobileView: boolean) => (
     <div
-      className={`relative p-3.5 xs:p-4.5 sm:p-7 flex flex-col justify-center h-full bg-[#FAF4E5] select-text overflow-hidden ${
+      className={`relative p-3.5 xs:p-4.5 sm:p-7 flex flex-col justify-between h-full bg-[#FAF4E5] select-text overflow-y-auto ${
         isMobileView ? 'rounded' : ''
       }`}
       style={{
@@ -302,47 +333,107 @@ export function InteractiveDiaryModal({
         backgroundSize: 'cover',
       }}
     >
-      {/* Subtle noise-based fibrous paper texture overlay */}
       <PaperFiberNoiseOverlay />
 
-      {/* Decorative center spine shadow gradient for desktop curvature */}
       {!isMobileView && (
         <div className="hidden md:block absolute top-0 bottom-0 left-0 w-10 bg-gradient-to-r from-black/25 via-black/10 to-transparent pointer-events-none z-10" />
       )}
-
-      {/* Curvature inner shadow */}
       <div className="absolute inset-0 pointer-events-none shadow-[inset_0_2px_10px_rgba(0,0,0,0.06)] z-10" />
 
-      {/* ================= FINAL ENTRY: THE HIDDEN CIPHER KEY ================= */}
-      {spread.rightPage.isFinalSpread && (
-        <div
-          data-testid="hidden-password-clue-box"
-          className="relative z-20 bg-[#FFF9EE] border-2 border-[#8F1320] p-3 sm:p-4 rounded shadow-lg text-center space-y-1.5 sm:space-y-2 -rotate-1 max-w-[300px] sm:max-w-none mx-auto my-auto"
-        >
-          <div className="font-serif text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] text-[#8F1320]">
-            ★ CONFIDENTIAL CIPHER KEY ★
+      {/* Narrative Continuation Block */}
+      <div className="relative z-20 space-y-2 xs:space-y-2.5">
+        {/* Page Header */}
+        <div className="border-b border-[#8F1320]/25 pb-1.5 xs:pb-2">
+          <div className="font-serif text-[10.5px] xs:text-[11.5px] sm:text-xs font-semibold text-[#8F1320] tracking-wider uppercase">
+            {spread.entryDate} · CONTINUATION
           </div>
-          <div className="py-1.5 px-3 sm:py-2 sm:px-4 bg-[#8F1320]/10 border-2 border-dashed border-[#8F1320] rounded inline-block">
-            <span className="font-mono text-xl sm:text-2xl font-bold tracking-[0.3em] text-[#8F1320]">
-              1311
-            </span>
-          </div>
-          <p className="font-serif text-[10.5px] sm:text-xs text-[#3D2E28] leading-tight">
-            {spread.rightPage.hiddenPasswordClue?.instruction ||
-              'Enter passcode 1311 or tap below to unlock the envelope'}
-          </p>
-
-          <button
-            type="button"
-            data-testid="unlock-envelope-direct-button"
-            onClick={() => {
-              onClose();
-              onProceedToUnlock();
-            }}
-            className="w-full py-2 px-3 sm:py-2.5 sm:px-4 bg-[#8F1320] hover:bg-[#A31525] active:bg-[#6E0E18] text-white font-mono text-[10.5px] sm:text-xs font-bold uppercase tracking-wider rounded transition-colors shadow-md cursor-pointer flex items-center justify-center gap-1.5 mt-1"
+          <h2
+            className="font-serif text-sm xs:text-base sm:text-lg font-bold tracking-tight text-[#1E1513] mt-0.5 leading-snug"
+            style={{ fontFamily: "'Cinzel', 'Lora', serif" }}
           >
-            <span>🔓 UNLOCK ENVELOPE (CODE: 1311) →</span>
-          </button>
+            {spread.rightPage.title}
+          </h2>
+        </div>
+
+        {/* Narrative Paragraphs */}
+        <div className="space-y-1.5 xs:space-y-2 sm:space-y-2.5 font-serif text-[11px] xs:text-[12px] sm:text-[13px] leading-[1.48] xs:leading-[1.52] sm:leading-relaxed text-[#2B1F1C]">
+          {spread.rightPage.text.map((paragraph, idx) => (
+            <p key={idx}>{paragraph}</p>
+          ))}
+        </div>
+
+        {/* ================= PAGE 8 SPECIFIC: THE FINAL CLUE & CALENDAR DETAIL ================= */}
+        {spread.rightPage.isFinalSpread && (
+          <div
+            data-testid="hidden-password-clue-box"
+            className="mt-3 p-3 sm:p-4 bg-[#FFF9EE] border-2 border-[#8F1320] rounded shadow-md space-y-2.5 text-center -rotate-0.5"
+          >
+            {/* The final handwritten clue lines */}
+            <div
+              className="text-xs xs:text-sm sm:text-base text-[#4A1017] leading-snug font-semibold space-y-0.5"
+              style={{ fontFamily: "'Caveat', cursive" }}
+            >
+              <p>“Every mystery has a key.</p>
+              <p>This one was hiding in plain sight.</p>
+              <p>Remember the date that started the case?”</p>
+            </div>
+
+            {/* Small handwritten calendar detail with 13 NOVEMBER circled in crimson */}
+            <div className="inline-flex flex-col items-center p-2 bg-[#FAF5EA] border border-[#BFA985] rounded shadow-sm">
+              <span className="font-serif text-[10px] sm:text-xs font-bold tracking-[0.2em] text-[#8F1320] uppercase pb-1 border-b border-[#8F1320]/30 w-full text-center">
+                NOVEMBER
+              </span>
+              <div className="grid grid-cols-7 gap-1.5 sm:gap-2 pt-1.5 text-[9px] sm:text-[10px] font-mono text-[#5C4538]">
+                <span>10</span>
+                <span>11</span>
+                <span>12</span>
+                {/* 13 NOVEMBER CIRCLED IN CRIMSON */}
+                <div className="relative font-bold text-[#A31525] flex items-center justify-center">
+                  <span className="relative z-10">13</span>
+                  <CrimsonCircleHighlight />
+                </div>
+                <span>14</span>
+                <span>15</span>
+                <span>16</span>
+              </div>
+              <span
+                className="text-[10px] sm:text-xs text-[#A31525] font-semibold pt-1 italic"
+                style={{ fontFamily: "'Caveat', cursive" }}
+              >
+                13 November · The date that started the case
+              </span>
+            </div>
+
+            {/* Password highlight */}
+            <div className="pt-0.5">
+              <span className="font-mono text-xs sm:text-sm font-bold tracking-widest text-[#8F1320] bg-[#8F1320]/10 border border-[#8F1320]/40 px-2.5 py-1 rounded">
+                PASSWORD: 1311
+              </span>
+            </div>
+
+            {/* Direct unlock button */}
+            <button
+              type="button"
+              data-testid="unlock-envelope-direct-button"
+              onClick={() => {
+                onClose();
+                onProceedToUnlock();
+              }}
+              className="w-full py-2 px-3 bg-[#8F1320] hover:bg-[#A31525] active:bg-[#6E0E18] text-white font-mono text-[10.5px] sm:text-xs font-bold uppercase tracking-wider rounded transition-colors shadow cursor-pointer flex items-center justify-center gap-1.5"
+            >
+              <span>🔓 UNLOCK ENVELOPE (CODE: 1311) →</span>
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Handwritten Signoff */}
+      {spread.rightPage.handwrittenSignoff && (
+        <div
+          className="relative z-20 pt-2 sm:pt-3 border-t border-[#B5A17D]/40 text-xs xs:text-sm sm:text-base text-[#6B5342] italic mt-auto"
+          style={{ fontFamily: "'Caveat', cursive" }}
+        >
+          {spread.rightPage.handwrittenSignoff}
         </div>
       )}
     </div>
@@ -352,11 +443,11 @@ export function InteractiveDiaryModal({
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Antique Personal Journal"
+      aria-label="The Girl Who Kept a Thousand Stories — Personal Diary"
       onKeyDown={handleKeyDown}
       className="fixed inset-0 z-50 flex flex-col justify-between items-center p-2 sm:p-4 bg-black/92 backdrop-blur-md overflow-hidden select-none"
     >
-      {/* ================= TOP CONTROL BAR (Outside Book Pages) ================= */}
+      {/* Top Control Bar */}
       <div className="w-full max-w-4xl flex items-center justify-between py-1.5 px-2 sm:px-3 mb-1 shrink-0 bg-[#140F0D]/90 border border-[#8F1320]/30 rounded text-neutral-300">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-[#8F1320] animate-pulse" />
@@ -364,12 +455,11 @@ export function InteractiveDiaryModal({
             className="font-serif italic text-xs sm:text-sm text-[#F0D5D8] tracking-wider"
             style={{ fontFamily: "'Cinzel', 'Lora', serif" }}
           >
-            Her Personal Journal
+            The Girl Who Kept a Thousand Stories
           </span>
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Natural Page Counter */}
           <span className="font-serif text-[11px] sm:text-xs text-[#C4B3A3]">
             {isMobile
               ? `Page ${pageIndex + 1} of ${totalPages}`
@@ -387,22 +477,16 @@ export function InteractiveDiaryModal({
         </div>
       </div>
 
-      {/* ================= PHYSICAL ANTIQUE BOOK CONTAINER ================= */}
+      {/* Book Container */}
       <div
         className="w-full max-w-4xl flex-1 min-h-0 flex items-center justify-center my-auto touch-pan-y"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        {/* Leather Book Cover Wrap & Spine Shadow */}
-        <div className="relative w-full h-full max-h-[58dvh] xs:max-h-[62dvh] sm:max-h-[68vh] md:max-h-[72vh] flex items-center justify-center shadow-[0_25px_60px_rgba(0,0,0,0.95),0_0_25px_rgba(143,19,32,0.3)] rounded-lg p-1.5 xs:p-2 sm:p-4 bg-[#23150F] border-2 sm:border-4 border-[#3D251A]">
-          {/* Aged Leather Border Bevel */}
+        <div className="relative w-full h-full max-h-[64dvh] xs:max-h-[68dvh] sm:max-h-[72vh] md:max-h-[76vh] flex items-center justify-center shadow-[0_25px_60px_rgba(0,0,0,0.95),0_0_25px_rgba(143,19,32,0.3)] rounded-lg p-1.5 xs:p-2 sm:p-4 bg-[#23150F] border-2 sm:border-4 border-[#3D251A]">
           <div className="absolute inset-0 pointer-events-none rounded-lg border border-[#170E0A] opacity-75 shadow-inner" />
 
-          {/* Book Spine Hinges and Stitches on Outer Casing */}
-          <div className="absolute -left-1 top-6 bottom-6 w-1 border-r border-[#4A2D1F]/50 hidden sm:block pointer-events-none" />
-          <div className="absolute -right-1 top-6 bottom-6 w-1 border-l border-[#4A2D1F]/50 hidden sm:block pointer-events-none" />
-
-          {/* ================= DESKTOP VIEW: TWO-PAGE SIDE-BY-SIDE SPREAD ================= */}
+          {/* Desktop 2-page spread */}
           {!isMobile ? (
             <div
               className={`relative w-full h-full grid grid-cols-2 bg-[#F4ECDA] text-[#241A15] rounded border border-[#BFA985] shadow-2xl overflow-hidden transition-all duration-200 ${
@@ -413,29 +497,24 @@ export function InteractiveDiaryModal({
                   : 'rotate-y-0 scale-100 opacity-100'
               }`}
             >
-              {/* Natural Centre Spine Binding / Fold Overlay */}
+              {/* Centre Spine Binding */}
               <div className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-8 pointer-events-none z-20 flex justify-center">
-                {/* Deep spine crease shadow */}
                 <div className="w-full h-full bg-gradient-to-r from-transparent via-black/35 to-transparent" />
-                {/* Centre binding thread groove */}
                 <div className="absolute top-0 bottom-0 w-[1.5px] bg-[#3D261E]/40" />
-                {/* Top and Bottom spine stitching marks */}
                 <span className="absolute top-2 w-2 h-0.5 bg-[#8F1320]/70 rounded-full" />
                 <span className="absolute bottom-2 w-2 h-0.5 bg-[#8F1320]/70 rounded-full" />
               </div>
 
-              {/* Left Page (Spread Left) */}
               <div className="h-full overflow-hidden">
                 {renderLeftPage(currentSpread, false)}
               </div>
 
-              {/* Right Page (Spread Right) */}
               <div className="h-full overflow-hidden">
                 {renderRightPage(currentSpread, false)}
               </div>
             </div>
           ) : (
-            /* ================= MOBILE VIEW: ONE COMPLETE DIARY PAGE AT A TIME ================= */
+            /* Mobile 1-page view */
             <div
               className={`relative w-full h-full max-w-[420px] mx-auto bg-[#F4ECDA] text-[#241A15] rounded border border-[#BFA985] shadow-2xl overflow-hidden transition-all duration-200 ${
                 turnDirection === 'next'
@@ -445,12 +524,10 @@ export function InteractiveDiaryModal({
                   : 'translate-x-0 scale-100 opacity-100'
               }`}
             >
-              {/* Mobile Single Page Content */}
               {isLeftPageOnMobile
                 ? renderLeftPage(currentSpread, true)
                 : renderRightPage(currentSpread, true)}
 
-              {/* Subtle Mobile Edge Tap Hints (Left 15% / Right 15%) */}
               {!isFirst && (
                 <button
                   type="button"
@@ -472,7 +549,7 @@ export function InteractiveDiaryModal({
         </div>
       </div>
 
-      {/* ================= BOTTOM PAGINATION CONTROLS (Outside Book Pages) ================= */}
+      {/* Pagination Controls */}
       <div className="w-full max-w-4xl flex items-center justify-between mt-1 px-1 sm:px-2 shrink-0">
         <button
           type="button"
@@ -491,8 +568,8 @@ export function InteractiveDiaryModal({
 
         <span className="font-serif text-xs text-amber-200/80 tracking-widest select-none">
           {isMobile
-            ? `${pageIndex + 1} / ${totalPages}`
-            : `${currentSpreadIndex + 1} / ${totalSpreads}`}
+            ? `Page ${pageIndex + 1} of ${totalPages}`
+            : `Spread ${currentSpreadIndex + 1} of ${totalSpreads}`}
         </span>
 
         <button
@@ -511,7 +588,7 @@ export function InteractiveDiaryModal({
         </button>
       </div>
 
-      {/* ================= DETECTIVE LAREN COMPANION (Outside Book, Fixed Area) ================= */}
+      {/* Detective Laren Companion */}
       <div className="w-full max-w-4xl flex items-center gap-2 mt-1 sm:mt-1.5 px-2.5 py-1.5 bg-[#120E0D]/95 border border-[#B45309]/50 rounded-lg text-neutral-300 shadow-lg shrink-0">
         <div className="relative shrink-0 w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center">
           <div className="absolute inset-0 rounded-full bg-amber-500/20 blur-xs" />
@@ -528,7 +605,7 @@ export function InteractiveDiaryModal({
           </div>
           <p className="font-serif text-[10.5px] sm:text-[11.5px] leading-tight text-[#F5EDE0] truncate sm:whitespace-normal">
             {isLast
-              ? '“Look! There’s the cipher code 1311! That’s the password to unlock the envelope!”'
+              ? '“Look! The final entry has a handwritten clue pointing to 13 November... the password is 1311!”'
               : '“finally we found the diary! The password should be in the final entry.”'}
           </p>
         </div>

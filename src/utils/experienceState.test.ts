@@ -222,3 +222,51 @@ test('diary single-page navigation and spread index mappings work correctly', ()
   // Clamping at first page
   assert.equal(handlePrevDiaryPage(0), 0);
 });
+
+test('new 8-page diary story "THE GIRL WHO KEPT A THOUSAND STORIES" conforms to specifications', () => {
+  assert.equal(EXPERIENCE_CONTENT.story.seriesTitle, 'THE GIRL WHO KEPT A THOUSAND STORIES');
+  assert.equal(DIARY_SPREADS.length, 4);
+
+  // Spread 1: Page 1 and Page 2
+  const s1 = DIARY_SPREADS[0];
+  assert.equal(s1.leftPage.title, 'PAGE 1 — THE HOUSE OF WARM LIGHT');
+  assert.equal(s1.leftPage.greetingPrefix, "hii, I'm");
+  assert.ok(s1.leftPage.text.some((t) => t.includes('There is something strange about familiar places')));
+  assert.ok(s1.leftPage.text.some((t) => t.includes('This house is full of warmth')));
+  assert.equal(s1.rightPage.title, 'PAGE 2 — CONTINUATION');
+  assert.equal(s1.rightPage.isContinuation, true);
+  assert.ok(s1.rightPage.text.some((t) => t.includes('wanting to see more means loving what I have any less')));
+
+  // Spread 2: Page 3 and Page 4
+  const s2 = DIARY_SPREADS[1];
+  assert.equal(s2.leftPage.title, 'PAGE 3 — THE SECRET ATLAS');
+  assert.equal(s2.leftPage.greetingPrefix, "hii, I'm");
+  assert.ok(s2.leftPage.text.some((t) => t.includes('Lisbon at sunset. Prague in the rain')));
+  assert.equal(s2.rightPage.title, 'PAGE 4 — CONTINUATION');
+  assert.equal(s2.rightPage.isContinuation, true);
+  assert.ok(s2.rightPage.text.some((t) => t.includes('Until then, the map stays folded inside this diary')));
+
+  // Spread 3: Page 5 and Page 6
+  const s3 = DIARY_SPREADS[2];
+  assert.equal(s3.leftPage.title, 'PAGE 5 — THE GIRL WHO NOTICES EVERYTHING');
+  assert.equal(s3.leftPage.greetingPrefix, "hii, I'm");
+  assert.ok(s3.leftPage.text.some((t) => t.includes('noticing the things everyone else overlooks')));
+  assert.equal(s3.rightPage.title, 'PAGE 6 — CONTINUATION');
+  assert.equal(s3.rightPage.isContinuation, true);
+  assert.ok(s3.rightPage.text.some((t) => t.includes('Someone has been leaving clues')));
+
+  // Spread 4: Page 7 and Page 8
+  const s4 = DIARY_SPREADS[3];
+  assert.equal(s4.leftPage.title, 'PAGE 7 — THE FINAL CHAPTER');
+  assert.equal(s4.leftPage.greetingPrefix, "hii, I'm");
+  assert.ok(s4.leftPage.text.some((t) => t.includes('The clues were never leading to a crime scene. They were leading to a story.')));
+  assert.equal(s4.rightPage.title, 'PAGE 8 — THE LAST CLUE');
+  assert.equal(s4.rightPage.isContinuation, true);
+  assert.equal(s4.rightPage.isFinalSpread, true);
+  assert.ok(s4.rightPage.text.some((t) => t.includes('So I\'ve prepared one last envelope')));
+  assert.equal(s4.rightPage.hiddenPasswordClue?.code, '1311');
+  assert.ok(s4.rightPage.hiddenPasswordClue?.handwrittenLines?.some((l) => l.includes('Every mystery has a key')));
+  assert.equal(s4.rightPage.hiddenPasswordClue?.calendarDetail?.month, 'NOVEMBER');
+  assert.equal(s4.rightPage.hiddenPasswordClue?.calendarDetail?.circledDay, 13);
+});
+
