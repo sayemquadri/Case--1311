@@ -97,15 +97,23 @@ function TornPaperNameCover() {
 }
 
 /**
- * Strips forensic labels from captions and marginalia to preserve authentic personal diary tone.
+ * Subtle CSS/SVG noise-based fibrous paper texture overlay.
+ * Infuses organic pulp grain and delicate laid-paper chain lines into the antique cream pages.
  */
-function cleanNoteText(rawText: string): string {
-  return rawText
-    .replace(/^Forensic Scan:\s*/i, '')
-    .replace(/^Forensic Observation:\s*/i, '')
-    .replace(/^Evidence Note:\s*/i, '')
-    .replace(/^Margin Note:\s*/i, '')
-    .replace(/^Status:\s*/i, '');
+function PaperFiberNoiseOverlay() {
+  return (
+    <div
+      className="absolute inset-0 pointer-events-none opacity-40 mix-blend-multiply z-10"
+      style={{
+        backgroundImage: `
+          url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='paperFiberNoise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.35  0 0 0 0 0.25  0 0 0 0 0.15  0 0 0 0.14 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23paperFiberNoise)'/%3E%3C/svg%3E"),
+          repeating-linear-gradient(0deg, transparent 0px, transparent 3px, rgba(140, 110, 80, 0.025) 3px, rgba(140, 110, 80, 0.025) 4px)
+        `,
+        backgroundSize: '150px 150px, 100% 4px',
+      }}
+      aria-hidden="true"
+    />
+  );
 }
 
 export function InteractiveDiaryModal({
@@ -219,7 +227,7 @@ export function InteractiveDiaryModal({
   // Render Left Page Content (Personal handwritten entry)
   const renderLeftPage = (spread: DiarySpread, isMobileView: boolean) => (
     <div
-      className={`relative p-3.5 xs:p-4.5 sm:p-7 flex flex-col justify-between h-full bg-[#FAF4E5] select-text ${
+      className={`relative p-3.5 xs:p-4.5 sm:p-7 flex flex-col justify-between h-full bg-[#FAF4E5] select-text overflow-hidden ${
         isMobileView ? 'rounded' : 'md:border-r border-[#C7B594]/60'
       }`}
       style={{
@@ -230,16 +238,19 @@ export function InteractiveDiaryModal({
         backgroundSize: 'cover',
       }}
     >
+      {/* Subtle noise-based fibrous paper texture overlay */}
+      <PaperFiberNoiseOverlay />
+
       {/* Decorative center spine shadow gradient for desktop curvature */}
       {!isMobileView && (
-        <div className="hidden md:block absolute top-0 bottom-0 right-0 w-10 bg-gradient-to-l from-black/25 via-black/10 to-transparent pointer-events-none" />
+        <div className="hidden md:block absolute top-0 bottom-0 right-0 w-10 bg-gradient-to-l from-black/25 via-black/10 to-transparent pointer-events-none z-10" />
       )}
 
       {/* Curvature inner shadow for physical realism */}
-      <div className="absolute inset-0 pointer-events-none shadow-[inset_0_2px_10px_rgba(0,0,0,0.06)]" />
+      <div className="absolute inset-0 pointer-events-none shadow-[inset_0_2px_10px_rgba(0,0,0,0.06)] z-10" />
 
       {/* Main Narrative Block */}
-      <div className="space-y-2 xs:space-y-2.5">
+      <div className="relative z-20 space-y-2 xs:space-y-2.5">
         {/* Entry Date & Title (Natural journal elements only) */}
         <div className="border-b border-[#8F1320]/25 pb-1.5 xs:pb-2">
           <div className="font-serif text-[10.5px] xs:text-[11.5px] sm:text-xs font-semibold text-[#8F1320] tracking-wider uppercase">
@@ -271,16 +282,16 @@ export function InteractiveDiaryModal({
       </div>
 
       {/* Bottom Signoff in Cursive Handwriting */}
-      <div className="pt-2 sm:pt-3 border-t border-[#B5A17D]/40 font-handwriting text-xs xs:text-sm sm:text-base text-[#6B5342] italic mt-auto">
+      <div className="relative z-20 pt-2 sm:pt-3 border-t border-[#B5A17D]/40 font-handwriting text-xs xs:text-sm sm:text-base text-[#6B5342] italic mt-auto">
         {spread.leftPage.handwrittenSignoff}
       </div>
     </div>
   );
 
-  // Render Right Page Content (Keepsakes, drawings, cipher key)
+  // Render Right Page Content (Clean antique journal page, with cipher key on final entry)
   const renderRightPage = (spread: DiarySpread, isMobileView: boolean) => (
     <div
-      className={`relative p-3.5 xs:p-4.5 sm:p-7 flex flex-col justify-between h-full bg-[#FAF4E5] select-text ${
+      className={`relative p-3.5 xs:p-4.5 sm:p-7 flex flex-col justify-center h-full bg-[#FAF4E5] select-text overflow-hidden ${
         isMobileView ? 'rounded' : ''
       }`}
       style={{
@@ -291,129 +302,49 @@ export function InteractiveDiaryModal({
         backgroundSize: 'cover',
       }}
     >
+      {/* Subtle noise-based fibrous paper texture overlay */}
+      <PaperFiberNoiseOverlay />
+
       {/* Decorative center spine shadow gradient for desktop curvature */}
       {!isMobileView && (
-        <div className="hidden md:block absolute top-0 bottom-0 left-0 w-10 bg-gradient-to-r from-black/25 via-black/10 to-transparent pointer-events-none" />
+        <div className="hidden md:block absolute top-0 bottom-0 left-0 w-10 bg-gradient-to-r from-black/25 via-black/10 to-transparent pointer-events-none z-10" />
       )}
 
       {/* Curvature inner shadow */}
-      <div className="absolute inset-0 pointer-events-none shadow-[inset_0_2px_10px_rgba(0,0,0,0.06)]" />
+      <div className="absolute inset-0 pointer-events-none shadow-[inset_0_2px_10px_rgba(0,0,0,0.06)] z-10" />
 
-      <div>
-        {/* Keepsake Header */}
-        <div className="border-b border-[#8F1320]/25 pb-1.5 xs:pb-2 mb-2 sm:mb-3 flex items-center justify-between">
-          <span className="font-serif italic text-[11px] sm:text-xs text-[#8F1320] font-semibold">
-            {spread.rightPage.isFinalSpread ? 'Secret Note & Cipher' : 'Memories & Keepsakes'}
-          </span>
-          <span className="font-handwriting text-xs text-[#7A6455] opacity-75">
-            fragment
-          </span>
+      {/* ================= FINAL ENTRY: THE HIDDEN CIPHER KEY ================= */}
+      {spread.rightPage.isFinalSpread && (
+        <div
+          data-testid="hidden-password-clue-box"
+          className="relative z-20 bg-[#FFF9EE] border-2 border-[#8F1320] p-3 sm:p-4 rounded shadow-lg text-center space-y-1.5 sm:space-y-2 -rotate-1 max-w-[300px] sm:max-w-none mx-auto my-auto"
+        >
+          <div className="font-serif text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] text-[#8F1320]">
+            ★ CONFIDENTIAL CIPHER KEY ★
+          </div>
+          <div className="py-1.5 px-3 sm:py-2 sm:px-4 bg-[#8F1320]/10 border-2 border-dashed border-[#8F1320] rounded inline-block">
+            <span className="font-mono text-xl sm:text-2xl font-bold tracking-[0.3em] text-[#8F1320]">
+              1311
+            </span>
+          </div>
+          <p className="font-serif text-[10.5px] sm:text-xs text-[#3D2E28] leading-tight">
+            {spread.rightPage.hiddenPasswordClue?.instruction ||
+              'Enter passcode 1311 or tap below to unlock the envelope'}
+          </p>
+
+          <button
+            type="button"
+            data-testid="unlock-envelope-direct-button"
+            onClick={() => {
+              onClose();
+              onProceedToUnlock();
+            }}
+            className="w-full py-2 px-3 sm:py-2.5 sm:px-4 bg-[#8F1320] hover:bg-[#A31525] active:bg-[#6E0E18] text-white font-mono text-[10.5px] sm:text-xs font-bold uppercase tracking-wider rounded transition-colors shadow-md cursor-pointer flex items-center justify-center gap-1.5 mt-1"
+          >
+            <span>🔓 UNLOCK ENVELOPE (CODE: 1311) →</span>
+          </button>
         </div>
-
-        {/* Visual Artifacts / Keepsakes */}
-        <div className="mb-2 sm:mb-3">
-          {spread.rightPage.photoType === 'house' && (
-            <div className="relative bg-[#2B1B15] p-2 sm:p-2.5 rounded shadow-md border border-[#8F1320]/40 -rotate-1 max-w-[280px] sm:max-w-none mx-auto">
-              {/* Decorative washi tape */}
-              <div className="absolute -top-2 left-6 w-10 sm:w-12 h-3.5 sm:h-4 bg-[#DFD0AA]/85 border border-[#9A8462] rotate-3 shadow-xs pointer-events-none" />
-              <div className="w-full h-20 xs:h-24 sm:h-28 bg-[#120D0A] flex flex-col items-center justify-center text-center p-2 rounded">
-                <span className="text-xl sm:text-2xl mb-1">🏡</span>
-                <span className="font-serif italic text-[10px] xs:text-[11px] sm:text-xs text-[#E8DCB9] leading-tight">
-                  &ldquo;A house of golden lamps, warm tea, and unyielding routines.&rdquo;
-                </span>
-              </div>
-              <div className="mt-1 text-[9.5px] xs:text-[10.5px] font-handwriting text-[#E8DCB9]/90 text-center">
-                {cleanNoteText(spread.rightPage.caption)}
-              </div>
-            </div>
-          )}
-
-          {spread.rightPage.photoType === 'map' && (
-            <div className="relative bg-[#F2E8D2] p-2 sm:p-2.5 rounded shadow-md border-2 border-dashed border-[#8F1320]/60 rotate-1 max-w-[280px] sm:max-w-none mx-auto">
-              <div className="w-full h-20 xs:h-24 sm:h-28 bg-[#FAF4E5] flex flex-col items-center justify-center text-center p-2 rounded border border-[#C2B193]">
-                <span className="text-xl sm:text-2xl mb-1">🗺️</span>
-                <span className="font-serif italic text-[10px] xs:text-[11px] sm:text-xs text-[#4A382C] leading-tight">
-                  &ldquo;Lisbon · Prague · Vienna — routes circled in red ink.&rdquo;
-                </span>
-              </div>
-              <div className="mt-1 text-[9.5px] xs:text-[10.5px] font-handwriting text-[#8F1320] text-center font-bold">
-                {cleanNoteText(spread.rightPage.caption)}
-              </div>
-            </div>
-          )}
-
-          {spread.rightPage.photoType === 'midnight' && (
-            <div className="relative bg-[#231A16] p-2 sm:p-2.5 rounded shadow-md border border-[#8F1320] -rotate-1 max-w-[280px] sm:max-w-none mx-auto">
-              <div className="w-full h-20 xs:h-24 sm:h-28 bg-[#0F0A08] flex flex-col items-center justify-center text-center p-2 rounded border border-[#52131A]">
-                <span className="text-xl sm:text-2xl mb-1">🕯️</span>
-                <span className="font-serif italic text-[10px] xs:text-[11px] sm:text-xs text-[#E8DCB9] leading-tight">
-                  &ldquo;The anonymous observer waits outside the light of the cage.&rdquo;
-                </span>
-              </div>
-              <div className="mt-1 text-[9.5px] xs:text-[10.5px] font-handwriting text-[#E8DCB9]/90 text-center">
-                {cleanNoteText(spread.rightPage.caption)}
-              </div>
-            </div>
-          )}
-
-          {/* ================= FINAL ENTRY: THE HIDDEN CIPHER KEY ================= */}
-          {spread.rightPage.isFinalSpread && (
-            <div
-              data-testid="hidden-password-clue-box"
-              className="relative bg-[#FFF9EE] border-2 border-[#8F1320] p-3 sm:p-4 rounded shadow-lg text-center space-y-1.5 sm:space-y-2 -rotate-1 max-w-[300px] sm:max-w-none mx-auto"
-            >
-              <div className="font-serif text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] text-[#8F1320]">
-                ★ CONFIDENTIAL CIPHER KEY ★
-              </div>
-              <div className="py-1.5 px-3 sm:py-2 sm:px-4 bg-[#8F1320]/10 border-2 border-dashed border-[#8F1320] rounded inline-block">
-                <span className="font-mono text-xl sm:text-2xl font-bold tracking-[0.3em] text-[#8F1320]">
-                  1311
-                </span>
-              </div>
-              <p className="font-serif text-[10.5px] sm:text-xs text-[#3D2E28] leading-tight">
-                {spread.rightPage.hiddenPasswordClue?.instruction ||
-                  'Enter passcode 1311 or tap below to unlock the envelope'}
-              </p>
-
-              <button
-                type="button"
-                data-testid="unlock-envelope-direct-button"
-                onClick={() => {
-                  onClose();
-                  onProceedToUnlock();
-                }}
-                className="w-full py-2 px-3 sm:py-2.5 sm:px-4 bg-[#8F1320] hover:bg-[#A31525] active:bg-[#6E0E18] text-white font-mono text-[10.5px] sm:text-xs font-bold uppercase tracking-wider rounded transition-colors shadow-md cursor-pointer flex items-center justify-center gap-1.5 mt-1"
-              >
-                <span>🔓 UNLOCK ENVELOPE (CODE: 1311) →</span>
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Marginalia Handwritten Notes (Cursive handwriting without forensic tags) */}
-        <div className="space-y-1.5 pt-1">
-          {spread.rightPage.annotationNotes
-            .filter((note) => !note.toLowerCase().includes('status:'))
-            .map((note, idx) => {
-              const cleaned = cleanNoteText(note);
-              return (
-                <div
-                  key={idx}
-                  className="font-handwriting text-xs xs:text-[13px] sm:text-[14px] text-[#5A3E2F] leading-snug flex items-start gap-1.5"
-                >
-                  <span className="text-[#8F1320] font-bold shrink-0">~</span>
-                  <span>{cleaned}</span>
-                </div>
-              );
-            })}
-        </div>
-      </div>
-
-      {/* Natural Bottom Accent */}
-      <div className="pt-2 sm:pt-3 border-t border-[#B5A17D]/40 flex items-center justify-between text-[#8F1320] text-xs font-serif italic opacity-70">
-        <span>journal notes</span>
-        <span>•</span>
-      </div>
+      )}
     </div>
   );
 
